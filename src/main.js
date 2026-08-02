@@ -56,9 +56,11 @@ const WHEEL_BODY_RADIUS_FRAC = 0.62;
 const TRINE_ANGLE = 120;
 const SEXTILE_ANGLE = 60;
 const SQUARE_ANGLE = 90;
+const QUINCUNX_ANGLE = 150;
 const OPPOSITION_ANGLE = 180;
 const CONJUNCTION_ANGLE = 0;
 const ASPECT_ORB = 5;
+const QUINCUNX_ORB = 3;
 
 let swePromise = null;
 
@@ -695,6 +697,7 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
   const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
   const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
   const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
+  const quincunxes = findAspects(bodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
   const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
   const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
   const aspectLines = [
@@ -712,6 +715,11 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
       const pb = polar(cx, cy, rAspect, longitudeToSvgRad(t.b.longitude, ascendant));
       return `<line class="sun-wheel__aspect sun-wheel__aspect--square" x1="${pa.x.toFixed(2)}" y1="${pa.y.toFixed(2)}" x2="${pb.x.toFixed(2)}" y2="${pb.y.toFixed(2)}" />`;
+    }),
+    ...quincunxes.map((t) => {
+      const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
+      const pb = polar(cx, cy, rAspect, longitudeToSvgRad(t.b.longitude, ascendant));
+      return `<line class="sun-wheel__aspect sun-wheel__aspect--quincunx" x1="${pa.x.toFixed(2)}" y1="${pa.y.toFixed(2)}" x2="${pb.x.toFixed(2)}" y2="${pb.y.toFixed(2)}" />`;
     }),
     ...oppositions.map((t) => {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
@@ -796,6 +804,7 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
   const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
   const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
   const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
+  const quincunxes = findAspects(bodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
   const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
   const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
 
@@ -810,6 +819,7 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
     ${buildAspectList(trines, "Trígono", "trine")}
     ${buildAspectList(sextiles, "Sextil", "sextile")}
     ${buildAspectList(squares, "Cuadratura", "square")}
+    ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
     ${buildAspectList(oppositions, "Oposición", "opposition")}
     ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
   `;

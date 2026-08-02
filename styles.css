@@ -18,6 +18,7 @@
   --air: #8a929c;
   --trine: #6a9a68;
   --sextile: #5a8fb8;
+  --quincunx: #3d8f4a;
   --square: #c45c4a;
   --conjunction: #6b2a3a;
   --font-display: "Syne", system-ui, sans-serif;
@@ -654,6 +655,14 @@ body {
   opacity: 0.88;
 }
 
+.sun-wheel__houses line.sun-wheel__aspect--quincunx {
+  stroke: #6bbf78;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 2.5 1.8;
+  opacity: 0.88;
+}
+
 .sun-wheel__houses line.sun-wheel__aspect--square {
   stroke: #e85a5a;
   stroke-width: 1.35;
@@ -876,6 +885,19 @@ body {
 
 .aspect-list--sextile .aspect-list__mark {
   background: var(--sextile);
+}
+
+.aspect-list--quincunx {
+  border: 1px solid rgba(61, 143, 74, 0.4);
+  background: rgba(61, 143, 74, 0.07);
+}
+
+.aspect-list--quincunx .aspect-list__title {
+  color: var(--quincunx);
+}
+
+.aspect-list--quincunx .aspect-list__mark {
+  background: var(--quincunx);
 }
 
 .aspect-list--square {
