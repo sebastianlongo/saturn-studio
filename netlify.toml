@@ -5,7 +5,30 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# SPA / rutas locales: servir index.html si falta el archivo
+# index.html siempre fresco: evita apuntar a chunks viejos tras un deploy
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Assets hasheados: cache largo (el nombre cambia en cada build)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Si falta un asset hasheado, 404 (no servir el HTML de la SPA)
+[[redirects]]
+  from = "/assets/*"
+  to = "/404.html"
+  status = 404
+
+# SPA: rutas de la app → index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
