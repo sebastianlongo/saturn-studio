@@ -18,6 +18,8 @@ const SIGN_NAMES = [
   "Piscis",
 ];
 
+const SIGN_GLYPHS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+
 /** Elemento por signo: 0 fuego, 1 tierra, 2 aire, 3 agua */
 const SIGN_ELEMENTS = [
   "fire",
@@ -45,8 +47,8 @@ const CHART_BODIES = [
   { name: "Urano", body: Planet.Uranus, glyph: "♅" },
   { name: "Neptuno", body: Planet.Neptune, glyph: "♆" },
   { name: "Plutón", body: Planet.Pluto, glyph: "♇" },
-  { name: "Lilith", body: LunarPoint.MeanApogee, glyph: "⚸" },
-  { name: "Nodo Norte", body: LunarPoint.MeanNode, glyph: "☊" },
+  { name: "Nodo Norte", body: LunarPoint.MeanNode, glyph: "☊", displayName: "Nodo N (m)" },
+  { name: "Lilith", body: LunarPoint.MeanApogee, glyph: "⚸", displayName: "Lilith (m)" },
 ];
 
 /** Fracciones del radio de la rueda (0–1). */
@@ -102,6 +104,25 @@ function formatDegreesInSign(longitude) {
   const deg = Math.floor(inSign);
   const min = Math.floor((inSign - deg) * 60);
   return `${deg}°${String(min).padStart(2, "0")}'`;
+}
+
+function formatDegreesPrecise(longitude) {
+  const inSign = normalizeLongitude(longitude) % 30;
+  let totalSec = Math.round(inSign * 3600);
+  if (totalSec >= 30 * 3600) totalSec = 30 * 3600 - 1;
+  const deg = Math.floor(totalSec / 3600);
+  const min = Math.floor((totalSec % 3600) / 60);
+  const sec = totalSec % 60;
+  return `${deg}°${String(min).padStart(2, "0")}'${String(sec).padStart(2, "0")}"`;
+}
+
+function formatZodiacPosition(longitude) {
+  const si = getSignIndexFromLongitude(longitude);
+  return `<span class="zodiac-glyph zodiac-glyph--${SIGN_ELEMENTS[si]}" aria-hidden="true">${SIGN_GLYPHS[si]}</span><span class="num">${formatDegreesPrecise(longitude)}</span>`;
+}
+
+function bodyLabel(body) {
+  return body.displayName || body.name;
 }
 
 function getHouseForLongitude(longitude, cusps) {
@@ -228,10 +249,13 @@ function calculatePartOfInfortune(ascendant, marsLon, saturnLon, sunHouse) {
 }
 
 function makeBodyEntry(name, glyph, longitude, cusps, extra = {}) {
+  const longitudeSpeed = extra.longitudeSpeed ?? 0;
   return {
     name,
     glyph,
     longitude,
+    longitudeSpeed,
+    retrograde: longitudeSpeed < 0,
     sign: getSignFromLongitude(longitude),
     degreesInSign: formatDegreesInSign(longitude),
     house: getHouseForLongitude(longitude, cusps),
@@ -863,10 +887,8 @@ function buildAnglesAndCuspsSection(houses) {
   }).join("");
 
   return `
-    <div class="result-block">
-      <h2 class="result-heading">Ángulos y cúspides</h2>
-      <p class="cusps-lead">Grados de Ascendente, Medio cielo, Descendente e IC, y cúspide de cada casa.</p>
-      <div class="table-wrap">
+    <div class="result-block result-block--compact">
+      <div class="table-wrap table-wrap--compact">
         <table class="data-table data-table--cusps">
           <thead>
             <tr><th>Ángulo</th><th>Signo</th><th>Grado</th><th>Longitud</th></tr>
@@ -876,7 +898,7 @@ function buildAnglesAndCuspsSection(houses) {
           </tbody>
         </table>
       </div>
-      <div class="table-wrap" style="margin-top: 1rem;">
+      <div class="table-wrap table-wrap--compact" style="margin-top: 0.75rem;">
         <table class="data-table data-table--cusps">
           <thead>
             <tr><th>Cúspide</th><th>Signo</th><th>Grado</th><th>Longitud</th></tr>
@@ -891,25 +913,68 @@ function buildAnglesAndCuspsSection(houses) {
   `;
 }
 
+function buildCompactBodiesHouses(bodies, houses, houseSystem) {
+  const planetRows = bodies
+    .map((b) => {
+      const retro = b.retrograde ? '<span class="retro-mark" title="Retrógrado">R</span>' : "";
+      return `
+      <tr>
+        <td class="ephem-planet">${b.glyph} ${bodyLabel(b)}</td>
+        <td class="ephem-pos">${formatZodiacPosition(b.longitude)}${retro}</td>
+        <td class="ephem-house">${b.house}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const houseRows = Array.from({ length: 12 }, (_, i) => {
+    const house = i + 1;
+    const lon = normalizeLongitude(houses.cusps[house]);
+    let label = `Casa ${house}`;
+    if (house === 1) label = "Casa 1 (AC)";
+    if (house === 10) label = "Casa 10 (MC)";
+    return `
+      <tr>
+        <td>${label}</td>
+        <td class="ephem-pos">${formatZodiacPosition(lon)}</td>
+      </tr>`;
+  }).join("");
+
+  return `
+    <div class="result-block result-block--compact">
+      <div class="chart-compact">
+        <div class="ephem-panel">
+          <table class="ephem-table">
+            <thead>
+              <tr>
+                <th>Planeta</th>
+                <th></th>
+                <th>Casa</th>
+              </tr>
+            </thead>
+            <tbody>${planetRows}</tbody>
+          </table>
+        </div>
+        <div class="ephem-panel">
+          <table class="ephem-table">
+            <thead>
+              <tr>
+                <th colspan="2">Casas (${houseSystem.shortLabel})</th>
+              </tr>
+            </thead>
+            <tbody>${houseRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOffset, houseSystem) {
   const dateUtcStr = dateUtc.toISOString().replace(".000Z", "Z");
-  const sun = bodies.find((b) => b.name === "Sol");
   const fortune = bodies.find((b) => b.name === "Fortuna");
   const infortune = bodies.find((b) => b.name === "Infortunio");
-  const signIndex = getSignIndexFromLongitude(sun.longitude);
   const tzLabel = tzOffset === 0 ? "UTC±0" : `UTC${tzOffset > 0 ? "+" : ""}${tzOffset}`;
   const sectLabel = fortune?.isDayChart ? "diurna" : "nocturna";
-
-  const rows = bodies
-    .map(
-      (b) => `
-      <tr${b.kind === "lot" ? ' class="data-table__lot"' : ""}>
-        <td>${b.glyph} ${b.name}</td>
-        <td>${b.sign} <span class="num">${b.degreesInSign}</span></td>
-        <td class="num">${b.house}</td>
-      </tr>`
-    )
-    .join("");
 
   return `
     <div class="result-block">
@@ -924,20 +989,7 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
       </dl>
     </div>
     ${buildAnglesAndCuspsSection(houses)}
-    <div class="result-block">
-      <h2 class="result-heading">Carta natal</h2>
-      ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant)}
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr><th>Cuerpo / punto</th><th>Signo</th><th>Casa</th></tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
   `;
 }
 
@@ -951,21 +1003,30 @@ async function calculateChart(dateUtc, lat, lon, houseSystem) {
     cusps,
   };
 
-  const bodies = CHART_BODIES.map(({ name, body, glyph }) => {
+  const bodies = [];
+  for (const { name, body, glyph, displayName } of CHART_BODIES) {
     const position = swe.calculatePosition(jd, body);
-    return makeBodyEntry(name, glyph, position.longitude, houses.cusps);
-  });
-
-  const northNode = bodies.find((b) => b.name === "Nodo Norte");
-  if (northNode) {
     bodies.push(
-      makeBodyEntry(
-        "Nodo Sur",
-        "☋",
-        normalizeLongitude(northNode.longitude + 180),
-        houses.cusps
-      )
+      makeBodyEntry(name, glyph, position.longitude, houses.cusps, {
+        longitudeSpeed: position.longitudeSpeed ?? 0,
+        displayName,
+      })
     );
+
+    if (name === "Nodo Norte") {
+      bodies.push(
+        makeBodyEntry(
+          "Nodo Sur",
+          "☋",
+          normalizeLongitude(position.longitude + 180),
+          houses.cusps,
+          {
+            longitudeSpeed: -(position.longitudeSpeed ?? 0),
+            displayName: "Nodo S",
+          }
+        )
+      );
+    }
   }
 
   const sun = bodies.find((b) => b.name === "Sol");
@@ -989,11 +1050,13 @@ async function calculateChart(dateUtc, lat, lon, houseSystem) {
       kind: "lot",
       formula: fortune.formula,
       isDayChart: fortune.isDayChart,
+      longitudeSpeed: 0,
     }),
     makeBodyEntry("Infortunio", "⊖", infortune.longitude, houses.cusps, {
       kind: "lot",
       formula: infortune.formula,
       isDayChart: infortune.isDayChart,
+      longitudeSpeed: 0,
     })
   );
 

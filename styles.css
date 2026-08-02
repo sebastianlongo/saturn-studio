@@ -1034,6 +1034,101 @@ body {
   border: 1px solid rgba(28, 31, 36, 0.1);
 }
 
+.table-wrap--compact {
+  max-width: 28rem;
+}
+
+.result-block--compact {
+  margin-bottom: 1.25rem;
+}
+
+.chart-compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 0.65rem;
+  align-items: start;
+  max-width: 40rem;
+}
+
+.ephem-panel {
+  border: 1px solid rgba(42, 58, 84, 0.55);
+  background: #fff;
+  overflow: hidden;
+}
+
+.ephem-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  color: #24314a;
+}
+
+.ephem-table th,
+.ephem-table td {
+  padding: 0.26rem 0.45rem;
+  text-align: left;
+  border-bottom: 1px dotted rgba(36, 49, 74, 0.28);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.ephem-table thead th {
+  font-weight: 700;
+  font-size: 0.76rem;
+  color: #1e2a44;
+  background: #eef1f6;
+  border-bottom: 1px solid rgba(36, 49, 74, 0.35);
+}
+
+.ephem-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ephem-planet {
+  font-weight: 500;
+}
+
+.ephem-pos {
+  font-variant-numeric: tabular-nums;
+}
+
+.ephem-house {
+  color: #c02323;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  width: 2.5rem;
+}
+
+.zodiac-glyph {
+  margin-right: 0.2rem;
+  font-size: 1.05em;
+}
+
+.zodiac-glyph--fire {
+  color: #c0453a;
+}
+
+.zodiac-glyph--earth {
+  color: #5a8a4a;
+}
+
+.zodiac-glyph--air {
+  color: #c47a2e;
+}
+
+.zodiac-glyph--water {
+  color: #3a6fbf;
+}
+
+.retro-mark {
+  margin-left: 0.15rem;
+  font-size: 0.72em;
+  font-weight: 700;
+  color: #3a6fbf;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -1151,5 +1246,10 @@ body {
   .hero {
     min-height: min(78vh, 40rem);
     align-items: end;
+  }
+
+  .chart-compact {
+    grid-template-columns: 1fr;
+    max-width: 28rem;
   }
 }
