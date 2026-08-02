@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saturn Studio — Carta natal</title>
+  <meta name="description" content="Saturn Studio: cartas natales tropicales con Swiss Ephemeris." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="header-brand" href="#">Saturn Studio</a>
+    <nav class="site-nav" aria-label="Secciones">
+      <a class="nav-link" href="#datos">carta</a>
+      <a class="nav-link" href="#dominante-datos">dominante</a>
+      <a class="nav-link" href="#vitalidad-datos">vitalidad</a>
+      <a class="nav-link" href="#biblioteca">biblioteca</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-label="Saturn Studio">
+    <div class="hero__sky" aria-hidden="true">
+      <svg class="hero__rings" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="planetGlow" cx="48%" cy="52%" r="42%">
+            <stop offset="0%" stop-color="#f0e6c8" />
+            <stop offset="45%" stop-color="#d8c49a" />
+            <stop offset="78%" stop-color="#a8926a" />
+            <stop offset="100%" stop-color="#6e6348" />
+          </radialGradient>
+          <linearGradient id="ringBand" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#8a8070" stop-opacity="0" />
+            <stop offset="18%" stop-color="#c4b496" stop-opacity="0.55" />
+            <stop offset="50%" stop-color="#e8dcc0" stop-opacity="0.85" />
+            <stop offset="82%" stop-color="#c4b496" stop-opacity="0.55" />
+            <stop offset="100%" stop-color="#8a8070" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <ellipse class="hero__ring hero__ring--outer" cx="600" cy="360" rx="520" ry="118" fill="none" stroke="url(#ringBand)" stroke-width="18" />
+        <ellipse class="hero__ring hero__ring--mid" cx="600" cy="360" rx="455" ry="98" fill="none" stroke="#b8a888" stroke-width="7" stroke-opacity="0.45" />
+        <ellipse class="hero__ring hero__ring--inner" cx="600" cy="360" rx="400" ry="82" fill="none" stroke="#d4c6a4" stroke-width="3" stroke-opacity="0.7" />
+        <circle class="hero__planet" cx="600" cy="360" r="118" fill="url(#planetGlow)" />
+        <ellipse cx="568" cy="330" rx="42" ry="28" fill="#f5edd8" opacity="0.22" />
+      </svg>
+    </div>
+    <div class="hero__copy">
+      <p class="hero__brand">Saturn Studio</p>
+      <h1 class="hero__headline">Cartas con peso y precisión</h1>
+      <p class="hero__lead">Astrología tropical, anillos de casas y puntos árabes — calculados con Swiss Ephemeris.</p>
+      <div class="hero__cta">
+        <a class="btn-primary" href="#datos">Calcular carta</a>
+        <a class="btn-secondary" href="#dominante-datos">Planeta dominante</a>
+        <a class="btn-secondary" href="#vitalidad-datos">Años de vitalidad</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="panel panel--visual" id="datos" aria-labelledby="datos-title">
+      <h2 id="datos-title" class="panel__section-title">Datos de nacimiento</h2>
+      <p class="panel__hint">
+        Introduce la <strong>hora local</strong> de nacimiento y el huso (Paraguay en verano 2000 = <strong>UTC−3</strong>; en invierno = UTC−4).
+        Elige el <strong>sistema de casas</strong>. Coordenadas: este = longitud positiva; oeste = negativa.
+      </p>
+      <form id="birth-form" class="birth-form" novalidate>
+        <div class="field">
+          <label for="birth-date">Fecha (local)</label>
+          <input type="date" id="birth-date" name="birth-date" required />
+        </div>
+        <div class="field">
+          <label for="birth-time">Hora (local)</label>
+          <input type="time" id="birth-time" name="birth-time" step="1" required />
+        </div>
+        <div class="field field--full">
+          <label for="tz-offset">Huso horario</label>
+          <select id="tz-offset" name="tz-offset" required>
+            <option value="0">UTC±0</option>
+            <option value="-3" selected>UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
+            <option value="-2">UTC−2</option>
+            <option value="-5">UTC−5</option>
+            <option value="1">UTC+1</option>
+            <option value="2">UTC+2</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="house-system">Sistema de casas</label>
+          <select id="house-system" name="house-system" required>
+            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
+            <option value="placidus">Placidus</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="place-name">Lugar (texto, opcional)</label>
+          <input type="text" id="place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+        </div>
+        <div class="field">
+          <label for="lat">Latitud (°)</label>
+          <input type="text" id="lat" name="lat" inputmode="decimal" autocomplete="off" required placeholder="-25.2897" />
+        </div>
+        <div class="field">
+          <label for="lon">Longitud (°)</label>
+          <input type="text" id="lon" name="lon" inputmode="decimal" autocomplete="off" required placeholder="-57.6268" />
+        </div>
+        <div class="field field--full">
+          <button type="submit" class="btn-primary">Calcular carta astral</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel panel--chart" id="carta" aria-labelledby="carta-title">
+      <h2 id="carta-title" class="panel__title">carta astral</h2>
+      <p class="panel__lead">
+        Posiciones eclípticas tropicales. Elige casas iguales o Placidus. Ascendente al este (bajo el horizonte). La hora local se convierte a UTC según el huso. Swiss Ephemeris (Moshier).
+      </p>
+
+      <p id="chart-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
+
+      <div id="chart-empty" class="chart-surface chart-surface--idle" aria-hidden="false">
+        <svg class="chart-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <ellipse cx="100" cy="100" rx="94" ry="28" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.35" transform="rotate(-18 100 100)" />
+          <ellipse cx="100" cy="100" rx="82" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-18 100 100)" />
+          <circle cx="100" cy="100" r="38" fill="#d8c49a" stroke="currentColor" stroke-width="1" opacity="0.9" />
+          <ellipse cx="90" cy="90" rx="12" ry="8" fill="#f0e6c8" opacity="0.35" />
+        </svg>
+        <span class="chart-surface__label">Rellena el formulario y pulsa calcular</span>
+      </div>
+
+      <div id="chart-output" class="chart-output" hidden></div>
+    </section>
+  </main>
+
+  <main class="layout layout--tool" id="dominante">
+    <section class="panel panel--visual" id="dominante-datos" aria-labelledby="dominante-datos-title">
+      <h2 id="dominante-datos-title" class="panel__section-title">Planeta dominante</h2>
+      <p class="panel__hint">
+        Mismos datos de nacimiento. El ranking pondera casas, regente del Ascendente,
+        dignidades, aspectos a Sol/Luna (incl. oposición) y conjunción/trígono/oposición al Asc (orbe ≤ 5°).
+        La cuadratura al Asc no resta.
+      </p>
+      <form id="dominant-form" class="birth-form" novalidate>
+        <div class="field">
+          <label for="dom-birth-date">Fecha (local)</label>
+          <input type="date" id="dom-birth-date" name="birth-date" required />
+        </div>
+        <div class="field">
+          <label for="dom-birth-time">Hora (local)</label>
+          <input type="time" id="dom-birth-time" name="birth-time" step="1" required />
+        </div>
+        <div class="field field--full">
+          <label for="dom-tz-offset">Huso horario</label>
+          <select id="dom-tz-offset" name="tz-offset" required>
+            <option value="0">UTC±0</option>
+            <option value="-3" selected>UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
+            <option value="-2">UTC−2</option>
+            <option value="-5">UTC−5</option>
+            <option value="1">UTC+1</option>
+            <option value="2">UTC+2</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="dom-house-system">Sistema de casas</label>
+          <select id="dom-house-system" name="house-system" required>
+            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
+            <option value="placidus">Placidus</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="dom-place-name">Lugar (texto, opcional)</label>
+          <input type="text" id="dom-place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+        </div>
+        <div class="field">
+          <label for="dom-lat">Latitud (°)</label>
+          <input type="text" id="dom-lat" name="lat" inputmode="decimal" autocomplete="off" required placeholder="-25.2897" />
+        </div>
+        <div class="field">
+          <label for="dom-lon">Longitud (°)</label>
+          <input type="text" id="dom-lon" name="lon" inputmode="decimal" autocomplete="off" required placeholder="-57.6268" />
+        </div>
+        <div class="field field--full">
+          <button type="submit" class="btn-primary">Calcular planeta dominante</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel panel--chart" id="dominante-resultado" aria-labelledby="dominante-title">
+      <h2 id="dominante-title" class="panel__title">resultado</h2>
+      <p class="panel__lead">
+        Método ponderado: casa angular (+5), sucedente (+3), cadente (+1); regente del Asc (+6);
+        domicilio (+5); exaltación (+4); conjunción a Sol/Luna (+4); trígono, cuadratura u oposición a Sol/Luna (+2);
+        conjunción al Asc (+4); trígono u oposición al Asc (+2). Cuadratura al Asc: sin puntos.
+      </p>
+
+      <p id="dominant-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
+
+      <div id="dominant-empty" class="chart-surface chart-surface--idle" aria-hidden="false">
+        <svg class="chart-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <ellipse cx="100" cy="100" rx="94" ry="28" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.35" transform="rotate(-18 100 100)" />
+          <ellipse cx="100" cy="100" rx="82" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-18 100 100)" />
+          <circle cx="100" cy="100" r="38" fill="#d8c49a" stroke="currentColor" stroke-width="1" opacity="0.9" />
+          <ellipse cx="90" cy="90" rx="12" ry="8" fill="#f0e6c8" opacity="0.35" />
+        </svg>
+        <span class="chart-surface__label">Rellena el formulario y pulsa calcular</span>
+      </div>
+
+      <div id="dominant-output" class="chart-output" hidden></div>
+    </section>
+  </main>
+
+  <main class="layout layout--tool" id="vitalidad">
+    <section class="panel panel--visual" id="vitalidad-datos" aria-labelledby="vitalidad-datos-title">
+      <h2 id="vitalidad-datos-title" class="panel__section-title">Años de vitalidad</h2>
+      <p class="panel__hint">
+        Método <strong>Bonatti</strong> (Brady): Hyleg → Alcoccoden → años planetarios.
+        Differentia 1ª/2ª simplificada; sin Hyleg = 3ª. Estima vitalidad del mapa, no predicción de muerte.
+      </p>
+      <form id="vitality-form" class="birth-form" novalidate>
+        <div class="field">
+          <label for="vit-birth-date">Fecha (local)</label>
+          <input type="date" id="vit-birth-date" name="birth-date" required />
+        </div>
+        <div class="field">
+          <label for="vit-birth-time">Hora (local)</label>
+          <input type="time" id="vit-birth-time" name="birth-time" step="1" required />
+        </div>
+        <div class="field field--full">
+          <label for="vit-tz-offset">Huso horario</label>
+          <select id="vit-tz-offset" name="tz-offset" required>
+            <option value="0">UTC±0</option>
+            <option value="-3" selected>UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
+            <option value="-2">UTC−2</option>
+            <option value="-5">UTC−5</option>
+            <option value="1">UTC+1</option>
+            <option value="2">UTC+2</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="vit-house-system">Sistema de casas</label>
+          <select id="vit-house-system" name="house-system" required>
+            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
+            <option value="placidus">Placidus</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="vit-place-name">Lugar (texto, opcional)</label>
+          <input type="text" id="vit-place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+        </div>
+        <div class="field">
+          <label for="vit-lat">Latitud (°)</label>
+          <input type="text" id="vit-lat" name="lat" inputmode="decimal" autocomplete="off" required placeholder="-25.2897" />
+        </div>
+        <div class="field">
+          <label for="vit-lon">Longitud (°)</label>
+          <input type="text" id="vit-lon" name="lon" inputmode="decimal" autocomplete="off" required placeholder="-57.6268" />
+        </div>
+        <div class="field field--full">
+          <button type="submit" class="btn-primary">Calcular años de vitalidad</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel panel--chart" id="vitalidad-resultado" aria-labelledby="vitalidad-title">
+      <h2 id="vitalidad-title" class="panel__title">resultado</h2>
+      <p class="panel__lead">
+        Hyleg (dador de vida), Alcoccoden (dador de años) y estimación por años menores / medios / mayores,
+        con sumas de benéficos y restas de maléficos. Orbes por planeta (p. ej. Júpiter 9°, Sol 12°).
+        Si no hay Hyleg, verás 3ª Differentia: es un resultado del método, no un fallo.
+      </p>
+
+      <p id="vitality-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
+
+      <div id="vitality-empty" class="chart-surface chart-surface--idle" aria-hidden="false">
+        <svg class="chart-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <ellipse cx="100" cy="100" rx="94" ry="28" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.35" transform="rotate(-18 100 100)" />
+          <ellipse cx="100" cy="100" rx="82" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-18 100 100)" />
+          <circle cx="100" cy="100" r="38" fill="#d8c49a" stroke="currentColor" stroke-width="1" opacity="0.9" />
+          <ellipse cx="90" cy="90" rx="12" ry="8" fill="#f0e6c8" opacity="0.35" />
+        </svg>
+        <span class="chart-surface__label">Rellena el formulario y pulsa calcular</span>
+      </div>
+
+      <div id="vitality-output" class="chart-output" hidden></div>
+    </section>
+  </main>
+
+  <section class="library" id="biblioteca">
+    <h2>Biblioteca</h2>
+    <p>Artículos, glosario y recursos sobre astrología. (Puedes enlazar aquí tus textos.)</p>
+  </section>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

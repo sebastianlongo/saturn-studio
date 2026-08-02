@@ -1,0 +1,102 @@
+Saturn Studio — Preguntas antes de armar “Calcular años de vida” (Hyleg)
+======================================================================
+Fecha: 1 ago 2026
+
+Contexto
+--------
+Querés una sección nueva, parecida a:
+  - Calcular carta
+  - Planeta dominante
+  - Calcular años de vida   ← esta
+
+La idea se basa en el PDF “The Hyleg and Alcoccoden” de Bernadette Brady
+(archivo Hyleg.pdf en esta carpeta).
+
+No hace falta que respondas ya. Podés leer el PDF y después elegir.
+Estas preguntas solo sirven para saber QUÉ versión programar primero,
+porque el texto describe varias escuelas y no todas se implementan igual.
+
+
+¿De qué habla el método? (resumen muy corto)
+--------------------------------------------
+1) Hyleg     = “dador de vida” (un punto/planeta que indica que hay vitalidad).
+2) Alcoccoden = planeta ligado al Hyleg; según su estado se estiman AÑOS.
+3) Differentia = categorías antiguas de “fuerza” del mapa (infancia / crianza /
+                 antes de los 12 / madurez / vejez). Brady aclara que hoy conviene
+                 pensarlo más como vitalidad que como predicción de muerte.
+
+El PDF compara autores (Ptolomeo, Bonatti, etc.). Por eso hay que elegir.
+
+
+Pregunta 1 — ¿Qué método de Hyleg usamos?
+-----------------------------------------
+A) BONATTI (recomendado para empezar)
+   Orden típico: Sol → Luna → Ascendente o Parte de la Fortuna
+   (según si el nacimiento es “conjuncional” = luna nueva previa,
+   o “prevencional” = luna llena previa) → grado de la lunación.
+   Es el que Brady usa más en los ejemplos (Chaplin, Bruce Lee).
+
+B) PTOLOMEO
+   Busca luminarias en “lugares hylegíacos” (casas 1, 11, 10, 9, 7).
+   Si falla, calcula un almuten (planeta con más dignidad en varios puntos).
+
+C) AMBOS
+   El formulario tendría un selector: Bonatti / Ptolomeo.
+
+
+Pregunta 2 — ¿Hasta dónde llega la primera versión de la sección?
+-----------------------------------------------------------------
+A) COMPLETO (recomendado “práctico”)
+   - Buscar Hyleg
+   - Buscar Alcoccoden
+   - Calcular años estimados (años planetarios menores / medios / mayores,
+     sumas por beneficos, restas por maléficos)
+   - Si no hay Hyleg → marcar como Differentia 3ª (vitalidad débil / sin dador claro)
+   - Differentia 1ª/2ª al inicio puede ir SIMPLIFICADA (sin toda la tabla Almudebit)
+
+B) SIN DIFFERENTIA 1ª/2ª
+   Solo: Hyleg → Alcoccoden → años estimados.
+   Más simple de programar y de probar.
+
+C) SOLO IDENTIFICAR
+   Mostrar Hyleg y Alcoccoden, todavía SIN número de años.
+
+
+Mi recomendación (cuando termines de leer)
+------------------------------------------
+  Bonatti + completo práctico
+  (opción A de la pregunta 1 + opción A de la pregunta 2)
+
+Es decir: una sección “Calcular años de vida” con el mismo formulario de
+nacimiento que la carta, resultado con Hyleg, Alcoccoden, años estimados
+y una nota ética (vitalidad / fuerza de vida, no predicción de muerte).
+
+
+Cómo responder después
+----------------------
+Cuando quieras seguir, escribí algo corto, por ejemplo:
+
+  Bonatti + completo
+
+o
+
+  Bonatti + solo Hyleg y Alcoccoden
+
+o
+
+  Ambos métodos + años
+
+y con eso se arma el plan de implementación en el sitio.
+
+
+Notas útiles al leer el PDF
+---------------------------
+- “Conjunctional” = la última lunación antes del nacimiento fue Luna Nueva.
+- “Preventional”  = la última lunación antes del nacimiento fue Luna Llena.
+- Términos egipcios = divisiones de cada signo usadas para dignidades/Alcoccoden.
+- Planetas modernos (Urano, Neptuno, Plutón) NO tienen “años planetarios”
+  clásicos; Brady indica que no sirven como Alcoccoden.
+- El cálculo da “años de vitalidad” si no hay muerte accidental; no es un
+  reloj exacto de deceso.
+
+Fin.
