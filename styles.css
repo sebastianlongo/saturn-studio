@@ -17,6 +17,7 @@
   --earth: #7a8a5c;
   --air: #8a929c;
   --trine: #6a9a68;
+  --sextile: #5a8fb8;
   --square: #c45c4a;
   --conjunction: #6b2a3a;
   --font-display: "Syne", system-ui, sans-serif;
@@ -646,6 +647,13 @@ body {
   opacity: 0.9;
 }
 
+.sun-wheel__houses line.sun-wheel__aspect--sextile {
+  stroke: #7ab0d4;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  opacity: 0.88;
+}
+
 .sun-wheel__houses line.sun-wheel__aspect--square {
   stroke: #e85a5a;
   stroke-width: 1.35;
@@ -857,6 +865,19 @@ body {
   background: var(--trine);
 }
 
+.aspect-list--sextile {
+  border: 1px solid rgba(90, 143, 184, 0.4);
+  background: rgba(90, 143, 184, 0.07);
+}
+
+.aspect-list--sextile .aspect-list__title {
+  color: var(--sextile);
+}
+
+.aspect-list--sextile .aspect-list__mark {
+  background: var(--sextile);
+}
+
 .aspect-list--square {
   border: 1px solid rgba(196, 92, 74, 0.4);
   background: rgba(196, 92, 74, 0.07);
@@ -1054,6 +1075,14 @@ body {
   border-top: 1px solid rgba(28, 31, 36, 0.08);
 }
 
+.donate {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem clamp(1.25rem, 4vw, 2.5rem) 2rem;
+  border-top: 1px solid rgba(28, 31, 36, 0.08);
+}
+
+.donate h2,
 .library h2 {
   margin: 0 0 0.5rem;
   font-family: var(--font-display);
@@ -1063,8 +1092,26 @@ body {
   letter-spacing: -0.02em;
 }
 
+.donate__lead,
 .library p {
   margin: 0;
+  color: var(--mist);
+  max-width: 55ch;
+}
+
+.donate__lead {
+  margin-bottom: 1.25rem;
+}
+
+.donate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.donate__hint {
+  margin: 0.85rem 0 0;
+  font-size: 0.88rem;
   color: var(--mist);
   max-width: 55ch;
 }

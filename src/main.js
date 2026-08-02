@@ -1,6 +1,7 @@
 import { SwissEphemeris } from "@swisseph/browser";
 import { Planet, LunarPoint, HouseSystem } from "@swisseph/core";
 import { analyzeVitality, buildVitalityResult } from "./hyleg.js";
+import { DONATION_LINKS } from "./donate-config.js";
 
 const SIGN_NAMES = [
   "Aries",
@@ -53,6 +54,7 @@ const WHEEL_SIGN_RADIUS_FRAC = 0.92;
 const WHEEL_BODY_RADIUS_FRAC = 0.62;
 
 const TRINE_ANGLE = 120;
+const SEXTILE_ANGLE = 60;
 const SQUARE_ANGLE = 90;
 const OPPOSITION_ANGLE = 180;
 const CONJUNCTION_ANGLE = 0;
@@ -691,6 +693,7 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
   }
 
   const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
+  const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
   const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
   const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
   const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
@@ -699,6 +702,11 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
       const pb = polar(cx, cy, rAspect, longitudeToSvgRad(t.b.longitude, ascendant));
       return `<line class="sun-wheel__aspect sun-wheel__aspect--trine" x1="${pa.x.toFixed(2)}" y1="${pa.y.toFixed(2)}" x2="${pb.x.toFixed(2)}" y2="${pb.y.toFixed(2)}" />`;
+    }),
+    ...sextiles.map((t) => {
+      const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
+      const pb = polar(cx, cy, rAspect, longitudeToSvgRad(t.b.longitude, ascendant));
+      return `<line class="sun-wheel__aspect sun-wheel__aspect--sextile" x1="${pa.x.toFixed(2)}" y1="${pa.y.toFixed(2)}" x2="${pb.x.toFixed(2)}" y2="${pb.y.toFixed(2)}" />`;
     }),
     ...squares.map((t) => {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
@@ -786,6 +794,7 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
     .join("");
 
   const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
+  const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
   const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
   const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
   const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
@@ -799,6 +808,7 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
       </div>
     </div>
     ${buildAspectList(trines, "Trígono", "trine")}
+    ${buildAspectList(sextiles, "Sextil", "sextile")}
     ${buildAspectList(squares, "Cuadratura", "square")}
     ${buildAspectList(oppositions, "Oposición", "opposition")}
     ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
@@ -1130,3 +1140,35 @@ wireBirthTool({
     );
   },
 });
+
+function wireDonations() {
+  const actions = document.getElementById("donate-actions");
+  const hint = document.getElementById("donate-hint");
+  if (!actions) return;
+
+  const buttons = [];
+  if (DONATION_LINKS.mercadopago) {
+    buttons.push(
+      `<a class="btn-primary" href="${DONATION_LINKS.mercadopago}" target="_blank" rel="noopener noreferrer">Donar con Mercado Pago</a>`
+    );
+  }
+  if (DONATION_LINKS.paypal) {
+    buttons.push(
+      `<a class="btn-secondary" href="${DONATION_LINKS.paypal}" target="_blank" rel="noopener noreferrer">Donar con PayPal</a>`
+    );
+  }
+
+  if (buttons.length) {
+    actions.innerHTML = buttons.join("");
+    if (hint) hint.hidden = true;
+  } else {
+    actions.innerHTML = "";
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent =
+        "Falta configurar el link de donación. Creá un link en Mercado Pago o PayPal y pegalo en src/donate-config.js.";
+    }
+  }
+}
+
+wireDonations();
