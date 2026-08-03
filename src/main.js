@@ -994,7 +994,6 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
       <h2 class="result-heading">Carta natal</h2>
       ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant)}
     </div>
-    ${buildAnglesAndCuspsSection(houses)}
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
   `;
 }
