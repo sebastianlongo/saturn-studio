@@ -63,6 +63,16 @@ const OPPOSITION_ANGLE = 180;
 const CONJUNCTION_ANGLE = 0;
 const ASPECT_ORB = 5;
 const QUINCUNX_ORB = 3;
+/** Orbe máximo para aspectos que involucran puntos matemáticos. */
+const POINT_ASPECT_ORB = 3;
+
+const MATHEMATICAL_POINT_NAMES = new Set([
+  "Lilith",
+  "Fortuna",
+  "Infortunio",
+  "Nodo Norte",
+  "Nodo Sur",
+]);
 
 let swePromise = null;
 
@@ -270,6 +280,18 @@ function shortestArcDegrees(lonA, lonB) {
   return d;
 }
 
+function isMathematicalPoint(body) {
+  return MATHEMATICAL_POINT_NAMES.has(body.name) || body.kind === "lot";
+}
+
+/** Orbe efectivo: puntos (Lilith, nodos, Fortuna, Infortunio) ≤ 3°. */
+function aspectOrbForPair(a, b, defaultOrb) {
+  if (isMathematicalPoint(a) || isMathematicalPoint(b)) {
+    return Math.min(defaultOrb, POINT_ASPECT_ORB);
+  }
+  return defaultOrb;
+}
+
 function findAspects(bodies, angle, orb = ASPECT_ORB) {
   const aspects = [];
   for (let i = 0; i < bodies.length; i++) {
@@ -280,7 +302,8 @@ function findAspects(bodies, angle, orb = ASPECT_ORB) {
 
       const separation = shortestArcDegrees(bodies[i].longitude, bodies[j].longitude);
       const orbUsed = Math.abs(separation - angle);
-      if (orbUsed <= orb) {
+      const maxOrb = aspectOrbForPair(bodies[i], bodies[j], orb);
+      if (orbUsed <= maxOrb) {
         aspects.push({
           a: bodies[i],
           b: bodies[j],
@@ -846,6 +869,7 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
     ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
     ${buildAspectList(oppositions, "Oposición", "opposition")}
     ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
+    <p class="cusps-note">Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.</p>
   `;
 }
 
