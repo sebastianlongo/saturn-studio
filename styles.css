@@ -6,10 +6,10 @@
   --ash: #cfd5dc;
   --stone: #e4e8ed;
   --paper: #f2f4f7;
-  --ring: #c9b896;
-  --ring-deep: #8f7e5c;
-  --planet: #d8c49a;
-  --planet-light: #ebe3d0;
+  --ring: #4a6fa5;
+  --ring-deep: #1e3a5f;
+  --planet: #2f4a6e;
+  --planet-light: #6b8cbe;
   --bronze: #9a7b4f;
   --bronze-deep: #6e5838;
   --fire: #c45c4a;
@@ -43,9 +43,9 @@ body {
   line-height: 1.55;
   color: var(--ink);
   background:
-    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(201, 184, 150, 0.28), transparent 55%),
-    radial-gradient(ellipse 70% 40% at 85% 20%, rgba(168, 180, 196, 0.22), transparent 50%),
-    linear-gradient(180deg, #dce2e8 0%, var(--stone) 38%, var(--paper) 100%);
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(74, 111, 165, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 40% at 85% 20%, rgba(30, 58, 95, 0.14), transparent 50%),
+    linear-gradient(180deg, #d6dde8 0%, var(--stone) 38%, var(--paper) 100%);
 }
 
 /* ——— Header ——— */
@@ -557,7 +557,7 @@ body {
   border-radius: 2px;
   background: transparent;
   border: none;
-  color: var(--ring-deep);
+  color: #1e3a5f;
 }
 
 .chart-surface--idle {
