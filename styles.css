@@ -87,9 +87,9 @@ body {
   justify-content: center;
   padding: 0.75rem 1.35rem;
   border-radius: 2px;
-  border: 1px solid rgba(28, 31, 36, 0.22);
+  border: 1px solid rgba(30, 58, 95, 0.45);
   background: transparent;
-  color: var(--ink);
+  color: #1e3a5f;
   font-family: var(--font-display);
   font-size: 0.98rem;
   font-weight: 700;
@@ -100,8 +100,8 @@ body {
 }
 
 .btn-secondary:hover {
-  border-color: var(--bronze);
-  background: rgba(201, 184, 150, 0.18);
+  border-color: #1e3a5f;
+  background: rgba(30, 58, 95, 0.1);
 }
 
 .layout--tool {
@@ -471,8 +471,8 @@ body {
 .field input:focus,
 .field select:focus {
   outline: none;
-  border-color: var(--bronze);
-  box-shadow: 0 0 0 2px rgba(154, 123, 79, 0.18);
+  border-color: #3a5a80;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.18);
 }
 
 .btn-primary {
@@ -484,8 +484,8 @@ body {
   padding: 0.75rem 1.35rem;
   border: none;
   border-radius: 2px;
-  background: linear-gradient(165deg, var(--bronze), var(--bronze-deep));
-  color: #f7f2e8;
+  background: linear-gradient(165deg, #3a5a80, #1e3a5f);
+  color: #eef3f8;
   font-family: var(--font-display);
   font-size: 0.98rem;
   font-weight: 700;
