@@ -971,8 +971,10 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
 
 function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOffset, houseSystem) {
   const dateUtcStr = dateUtc.toISOString().replace(".000Z", "Z");
+  const sun = bodies.find((b) => b.name === "Sol");
   const fortune = bodies.find((b) => b.name === "Fortuna");
   const infortune = bodies.find((b) => b.name === "Infortunio");
+  const signIndex = getSignIndexFromLongitude(sun.longitude);
   const tzLabel = tzOffset === 0 ? "UTC±0" : `UTC${tzOffset > 0 ? "+" : ""}${tzOffset}`;
   const sectLabel = fortune?.isDayChart ? "diurna" : "nocturna";
 
@@ -987,6 +989,10 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
         <dt>P. Fortuna</dt><dd>${fortune.sign} <span class="num">${fortune.degreesInSign}</span> · casa ${fortune.house} <span class="meta-note">(${sectLabel}: ${fortune.formula})</span></dd>
         <dt>P. Infortunio</dt><dd>${infortune.sign} <span class="num">${infortune.degreesInSign}</span> · casa ${infortune.house} <span class="meta-note">(${sectLabel}: ${infortune.formula})</span></dd>
       </dl>
+    </div>
+    <div class="result-block">
+      <h2 class="result-heading">Carta natal</h2>
+      ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant)}
     </div>
     ${buildAnglesAndCuspsSection(houses)}
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
