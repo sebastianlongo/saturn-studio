@@ -64,7 +64,7 @@
       <h2 id="datos-title" class="panel__section-title">Datos de nacimiento</h2>
       <p class="panel__hint">
         Introduce la <strong>hora local</strong> de nacimiento y el huso (Paraguay en verano 2000 = <strong>UTC−3</strong>; en invierno = UTC−4).
-        Elige el <strong>sistema de casas</strong>. Coordenadas: este = longitud positiva; oeste = negativa.
+        Elige el <strong>sistema de casas</strong>. Podés ubicar por <strong>país y departamento/provincia</strong> o cargar <strong>coordenadas manuales</strong>.
       </p>
       <form id="birth-form" class="birth-form" novalidate>
         <div class="field">
@@ -94,26 +94,60 @@
             <option value="placidus">Placidus</option>
           </select>
         </div>
-        <div class="field field--full">
-          <label for="birth-country">País de nacimiento</label>
-          <select id="birth-country" name="birth-country" required>
-            <option value="" disabled selected>Elegí un país</option>
-            <option value="Paraguay">Paraguay</option>
-            <option value="Argentina">Argentina</option>
-          </select>
+
+        <fieldset class="field field--full location-mode">
+          <legend class="location-mode__legend">¿Cómo ubicamos el nacimiento?</legend>
+          <div class="location-mode__options">
+            <label class="location-mode__option">
+              <input type="radio" name="location-mode" id="location-mode-region" value="region" checked />
+              <span>País y departamento / provincia</span>
+            </label>
+            <label class="location-mode__option">
+              <input type="radio" name="location-mode" id="location-mode-manual" value="manual" />
+              <span>Coordenadas manuales</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div id="location-region-fields" class="location-panel field--full">
+          <div class="field field--full">
+            <label for="birth-country">País de nacimiento</label>
+            <select id="birth-country" name="birth-country">
+              <option value="" disabled selected>Elegí un país</option>
+              <option value="Paraguay">Paraguay</option>
+              <option value="Argentina">Argentina</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <label for="birth-region" id="birth-region-label">Departamento / provincia</label>
+            <select id="birth-region" name="birth-region" disabled>
+              <option value="">Primero elegí un país</option>
+            </select>
+          </div>
+          <p class="location-coords-hint" id="region-coords-hint" hidden></p>
+          <div class="field field--full">
+            <label for="place-name-region">Ciudad o detalle (opcional)</label>
+            <input type="text" id="place-name-region" name="place-name-region" autocomplete="off" placeholder="Ej. barrio o ciudad" />
+          </div>
         </div>
-        <div class="field field--full">
-          <label for="place-name">Lugar (texto, opcional)</label>
-          <input type="text" id="place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+
+        <div id="location-manual-fields" class="location-panel field--full" hidden>
+          <div class="field field--full">
+            <label for="place-name">Lugar (texto, opcional)</label>
+            <input type="text" id="place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+          </div>
+          <div class="birth-form birth-form--nested">
+            <div class="field">
+              <label for="lat">Latitud (°)</label>
+              <input type="text" id="lat" name="lat" inputmode="decimal" autocomplete="off" placeholder="-25.2897" />
+            </div>
+            <div class="field">
+              <label for="lon">Longitud (°)</label>
+              <input type="text" id="lon" name="lon" inputmode="decimal" autocomplete="off" placeholder="-57.6268" />
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label for="lat">Latitud (°)</label>
-          <input type="text" id="lat" name="lat" inputmode="decimal" autocomplete="off" required placeholder="-25.2897" />
-        </div>
-        <div class="field">
-          <label for="lon">Longitud (°)</label>
-          <input type="text" id="lon" name="lon" inputmode="decimal" autocomplete="off" required placeholder="-57.6268" />
-        </div>
+
         <div class="field field--full">
           <button type="submit" class="btn-primary">Calcular carta astral</button>
         </div>

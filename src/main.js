@@ -2,6 +2,7 @@ import { SwissEphemeris } from "@swisseph/browser";
 import { Planet, LunarPoint, HouseSystem } from "@swisseph/core";
 import { analyzeVitality, buildVitalityResult } from "./hyleg.js";
 import { DONATION_LINKS } from "./donate-config.js";
+import { findRegion, getCountryRegions, getRegionLabel } from "./location-regions.js";
 
 const SIGN_NAMES = [
   "Aries",
@@ -1106,18 +1107,74 @@ function readBirthFormFields(ids) {
   const timeStr = document.getElementById(ids.time).value;
   const tzOffset = Number(document.getElementById(ids.tz).value);
   const houseSystem = resolveHouseSystem(document.getElementById(ids.house).value);
+
+  if (ids.locationMode) {
+    const mode =
+      document.querySelector(`input[name="${ids.locationMode}"]:checked`)?.value || "region";
+
+    if (mode === "region") {
+      const country = document.getElementById(ids.country).value.trim();
+      const regionId = document.getElementById(ids.region).value.trim();
+      const region = findRegion(country, regionId);
+      const placeName = document.getElementById(ids.placeRegion).value.trim();
+      return {
+        dateStr,
+        timeStr,
+        tzOffset,
+        houseSystem,
+        locationMode: "region",
+        placeName,
+        country,
+        regionName: region?.name || "",
+        lat: region?.lat ?? NaN,
+        lon: region?.lon ?? NaN,
+      };
+    }
+
+    const placeName = document.getElementById(ids.place).value.trim();
+    const lat = parseCoordinate(document.getElementById(ids.lat).value);
+    const lon = parseCoordinate(document.getElementById(ids.lon).value);
+    return {
+      dateStr,
+      timeStr,
+      tzOffset,
+      houseSystem,
+      locationMode: "manual",
+      placeName,
+      country: "",
+      regionName: "",
+      lat,
+      lon,
+    };
+  }
+
   const placeName = document.getElementById(ids.place).value.trim();
   const country = ids.country
     ? document.getElementById(ids.country).value.trim()
     : "";
   const lat = parseCoordinate(document.getElementById(ids.lat).value);
   const lon = parseCoordinate(document.getElementById(ids.lon).value);
-  return { dateStr, timeStr, tzOffset, houseSystem, placeName, country, lat, lon };
+  return {
+    dateStr,
+    timeStr,
+    tzOffset,
+    houseSystem,
+    locationMode: "manual",
+    placeName,
+    country,
+    regionName: "",
+    lat,
+    lon,
+  };
 }
 
-function validateBirthInput({ dateStr, timeStr, lat, lon, tzOffset, country }, requireCountry = false) {
+function validateBirthInput(input) {
+  const { dateStr, timeStr, lat, lon, tzOffset, locationMode, country, regionName } = input;
   if (!dateStr || !timeStr) return "Indica fecha y hora local.";
-  if (requireCountry && !country) return "Elegí el país de nacimiento.";
+  if (locationMode === "region") {
+    if (!country) return "Elegí el país de nacimiento.";
+    if (!regionName) return "Elegí el departamento o la provincia.";
+  }
   if (Number.isNaN(lat) || lat < -90 || lat > 90) return "La latitud debe estar entre −90 y 90.";
   if (Number.isNaN(lon) || lon < -180 || lon > 180) {
     return "La longitud debe estar entre −180 y 180.";
@@ -1126,7 +1183,16 @@ function validateBirthInput({ dateStr, timeStr, lat, lon, tzOffset, country }, r
   return null;
 }
 
-function birthInputToUtc({ dateStr, timeStr, tzOffset, placeName, country, lat, lon }) {
+function birthInputToUtc({
+  dateStr,
+  timeStr,
+  tzOffset,
+  placeName,
+  country,
+  regionName,
+  lat,
+  lon,
+}) {
   const [y, mo, d] = dateStr.split("-").map(Number);
   const timeParts = timeStr.split(":");
   const hh = Number(timeParts[0] ?? 0);
@@ -1134,14 +1200,14 @@ function birthInputToUtc({ dateStr, timeStr, tzOffset, placeName, country, lat, 
   const ss = Number(timeParts[2] ?? 0);
   const dateUtc = new Date(Date.UTC(y, mo - 1, d, hh - tzOffset, mm, ss));
   const localLabel = `${dateStr} ${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-  const placeParts = [placeName, country].filter(Boolean);
+  const placeParts = [placeName, regionName, country].filter(Boolean);
   const placeLabel = placeParts.length
-    ? placeParts.join(", ")
+    ? `${placeParts.join(", ")} (${lat.toFixed(4)}°, ${lon.toFixed(4)}°)`
     : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
   return { dateUtc, localLabel, placeLabel };
 }
 
-function wireBirthTool({ form, output, empty, error, fieldIds, buildResult, requireCountry = false }) {
+function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
   const submitBtn = form?.querySelector('button[type="submit"]');
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1152,7 +1218,7 @@ function wireBirthTool({ form, output, empty, error, fieldIds, buildResult, requ
     output.hidden = true;
 
     const input = readBirthFormFields(fieldIds);
-    const validationError = validateBirthInput(input, requireCountry);
+    const validationError = validateBirthInput(input);
     if (validationError) {
       error.textContent = validationError;
       error.hidden = false;
@@ -1199,19 +1265,94 @@ wireBirthTool({
   output: document.getElementById("chart-output"),
   empty: document.getElementById("chart-empty"),
   error: document.getElementById("chart-error"),
-  requireCountry: true,
   fieldIds: {
     date: "birth-date",
     time: "birth-time",
     tz: "tz-offset",
     house: "house-system",
+    locationMode: "location-mode",
     country: "birth-country",
+    region: "birth-region",
+    placeRegion: "place-name-region",
     place: "place-name",
     lat: "lat",
     lon: "lon",
   },
   buildResult: buildChartResult,
 });
+
+function wireChartLocationMode() {
+  const regionPanel = document.getElementById("location-region-fields");
+  const manualPanel = document.getElementById("location-manual-fields");
+  const countrySelect = document.getElementById("birth-country");
+  const regionSelect = document.getElementById("birth-region");
+  const regionLabel = document.getElementById("birth-region-label");
+  const coordsHint = document.getElementById("region-coords-hint");
+  const modeRadios = document.querySelectorAll('input[name="location-mode"]');
+
+  function setMode(mode) {
+    const isRegion = mode === "region";
+    if (regionPanel) regionPanel.hidden = !isRegion;
+    if (manualPanel) manualPanel.hidden = isRegion;
+    if (countrySelect) countrySelect.required = isRegion;
+    if (regionSelect) regionSelect.required = isRegion;
+    const lat = document.getElementById("lat");
+    const lon = document.getElementById("lon");
+    if (lat) lat.required = !isRegion;
+    if (lon) lon.required = !isRegion;
+  }
+
+  function fillRegions(country) {
+    if (!regionSelect || !regionLabel) return;
+    const regions = getCountryRegions(country);
+    regionLabel.textContent = getRegionLabel(country);
+    regionSelect.innerHTML = "";
+    if (!country || !regions.length) {
+      regionSelect.disabled = true;
+      regionSelect.innerHTML = '<option value="">Primero elegí un país</option>';
+      if (coordsHint) coordsHint.hidden = true;
+      return;
+    }
+    regionSelect.disabled = false;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    placeholder.textContent = `Elegí ${getRegionLabel(country).toLowerCase()}`;
+    regionSelect.appendChild(placeholder);
+    for (const region of regions) {
+      const opt = document.createElement("option");
+      opt.value = region.id;
+      opt.textContent = region.name;
+      regionSelect.appendChild(opt);
+    }
+    if (coordsHint) coordsHint.hidden = true;
+  }
+
+  function updateCoordsHint() {
+    if (!coordsHint || !countrySelect || !regionSelect) return;
+    const region = findRegion(countrySelect.value, regionSelect.value);
+    if (!region) {
+      coordsHint.hidden = true;
+      coordsHint.textContent = "";
+      return;
+    }
+    coordsHint.hidden = false;
+    coordsHint.textContent = `Coordenadas usadas (capital regional): ${region.lat.toFixed(4)}°, ${region.lon.toFixed(4)}°`;
+  }
+
+  modeRadios.forEach((radio) => {
+    radio.addEventListener("change", () => setMode(radio.value));
+  });
+  countrySelect?.addEventListener("change", () => {
+    fillRegions(countrySelect.value);
+  });
+  regionSelect?.addEventListener("change", updateCoordsHint);
+
+  setMode(document.querySelector('input[name="location-mode"]:checked')?.value || "region");
+}
+
+wireChartLocationMode();
 
 wireBirthTool({
   form: document.getElementById("dominant-form"),

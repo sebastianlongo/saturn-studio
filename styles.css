@@ -422,6 +422,65 @@ body {
   min-width: 0;
 }
 
+.birth-form--nested {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.85rem 1rem;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.location-mode {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(30, 58, 95, 0.25);
+  border-radius: 2px;
+  background: rgba(30, 58, 95, 0.04);
+}
+
+.location-mode__legend {
+  padding: 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.location-mode__options {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.location-mode__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.location-mode__option input {
+  margin-top: 0.2rem;
+}
+
+.location-panel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.location-panel[hidden] {
+  display: none !important;
+}
+
+.location-coords-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--mist);
+}
+
 .field {
   display: flex;
   flex-direction: column;
