@@ -848,13 +848,6 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
     })
     .join("");
 
-  const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
-  const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
-  const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
-  const quincunxes = findAspects(bodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
-  const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
-  const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
-
   return `
     <div class="sun-wheel">
       <div class="sun-wheel__ring">
@@ -863,13 +856,28 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
         ${bodyItems}
       </div>
     </div>
-    ${buildAspectList(trines, "Trígono", "trine")}
-    ${buildAspectList(sextiles, "Sextil", "sextile")}
-    ${buildAspectList(squares, "Cuadratura", "square")}
-    ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
-    ${buildAspectList(oppositions, "Oposición", "opposition")}
-    ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
-    <p class="cusps-note">Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.</p>
+  `;
+}
+
+function buildAspectLists(bodies) {
+  const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
+  const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
+  const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
+  const quincunxes = findAspects(bodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
+  const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
+  const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
+
+  return `
+    <div class="result-block">
+      <h2 class="result-heading">Aspectos</h2>
+      ${buildAspectList(trines, "Trígono", "trine")}
+      ${buildAspectList(sextiles, "Sextil", "sextile")}
+      ${buildAspectList(squares, "Cuadratura", "square")}
+      ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
+      ${buildAspectList(oppositions, "Oposición", "opposition")}
+      ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
+      <p class="cusps-note">Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.</p>
+    </div>
   `;
 }
 
@@ -1019,6 +1027,7 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
       ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant)}
     </div>
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
+    ${buildAspectLists(bodies)}
   `;
 }
 
@@ -1098,13 +1107,17 @@ function readBirthFormFields(ids) {
   const tzOffset = Number(document.getElementById(ids.tz).value);
   const houseSystem = resolveHouseSystem(document.getElementById(ids.house).value);
   const placeName = document.getElementById(ids.place).value.trim();
+  const country = ids.country
+    ? document.getElementById(ids.country).value.trim()
+    : "";
   const lat = parseCoordinate(document.getElementById(ids.lat).value);
   const lon = parseCoordinate(document.getElementById(ids.lon).value);
-  return { dateStr, timeStr, tzOffset, houseSystem, placeName, lat, lon };
+  return { dateStr, timeStr, tzOffset, houseSystem, placeName, country, lat, lon };
 }
 
-function validateBirthInput({ dateStr, timeStr, lat, lon, tzOffset }) {
+function validateBirthInput({ dateStr, timeStr, lat, lon, tzOffset, country }, requireCountry = false) {
   if (!dateStr || !timeStr) return "Indica fecha y hora local.";
+  if (requireCountry && !country) return "Elegí el país de nacimiento.";
   if (Number.isNaN(lat) || lat < -90 || lat > 90) return "La latitud debe estar entre −90 y 90.";
   if (Number.isNaN(lon) || lon < -180 || lon > 180) {
     return "La longitud debe estar entre −180 y 180.";
@@ -1113,7 +1126,7 @@ function validateBirthInput({ dateStr, timeStr, lat, lon, tzOffset }) {
   return null;
 }
 
-function birthInputToUtc({ dateStr, timeStr, tzOffset, placeName, lat, lon }) {
+function birthInputToUtc({ dateStr, timeStr, tzOffset, placeName, country, lat, lon }) {
   const [y, mo, d] = dateStr.split("-").map(Number);
   const timeParts = timeStr.split(":");
   const hh = Number(timeParts[0] ?? 0);
@@ -1121,11 +1134,14 @@ function birthInputToUtc({ dateStr, timeStr, tzOffset, placeName, lat, lon }) {
   const ss = Number(timeParts[2] ?? 0);
   const dateUtc = new Date(Date.UTC(y, mo - 1, d, hh - tzOffset, mm, ss));
   const localLabel = `${dateStr} ${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-  const placeLabel = placeName || `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+  const placeParts = [placeName, country].filter(Boolean);
+  const placeLabel = placeParts.length
+    ? placeParts.join(", ")
+    : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
   return { dateUtc, localLabel, placeLabel };
 }
 
-function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
+function wireBirthTool({ form, output, empty, error, fieldIds, buildResult, requireCountry = false }) {
   const submitBtn = form?.querySelector('button[type="submit"]');
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1136,7 +1152,7 @@ function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
     output.hidden = true;
 
     const input = readBirthFormFields(fieldIds);
-    const validationError = validateBirthInput(input);
+    const validationError = validateBirthInput(input, requireCountry);
     if (validationError) {
       error.textContent = validationError;
       error.hidden = false;
@@ -1183,11 +1199,13 @@ wireBirthTool({
   output: document.getElementById("chart-output"),
   empty: document.getElementById("chart-empty"),
   error: document.getElementById("chart-error"),
+  requireCountry: true,
   fieldIds: {
     date: "birth-date",
     time: "birth-time",
     tz: "tz-offset",
     house: "house-system",
+    country: "birth-country",
     place: "place-name",
     lat: "lat",
     lon: "lon",
