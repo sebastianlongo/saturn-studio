@@ -1,7 +1,6 @@
 import { SwissEphemeris } from "@swisseph/browser";
 import { Planet, LunarPoint, HouseSystem } from "@swisseph/core";
 import { analyzeVitality, buildVitalityResult } from "./hyleg.js";
-import { DONATION_LINKS } from "./donate-config.js";
 import { findRegion, getCountryRegions, getRegionLabel } from "./location-regions.js";
 
 const SIGN_NAMES = [
@@ -1281,14 +1280,24 @@ wireBirthTool({
   buildResult: buildChartResult,
 });
 
-function wireChartLocationMode() {
-  const regionPanel = document.getElementById("location-region-fields");
-  const manualPanel = document.getElementById("location-manual-fields");
-  const countrySelect = document.getElementById("birth-country");
-  const regionSelect = document.getElementById("birth-region");
-  const regionLabel = document.getElementById("birth-region-label");
-  const coordsHint = document.getElementById("region-coords-hint");
-  const modeRadios = document.querySelectorAll('input[name="location-mode"]');
+function wireLocationMode({
+  modeName,
+  regionPanelId,
+  manualPanelId,
+  countryId,
+  regionId,
+  regionLabelId,
+  coordsHintId,
+  latId,
+  lonId,
+}) {
+  const regionPanel = document.getElementById(regionPanelId);
+  const manualPanel = document.getElementById(manualPanelId);
+  const countrySelect = document.getElementById(countryId);
+  const regionSelect = document.getElementById(regionId);
+  const regionLabel = document.getElementById(regionLabelId);
+  const coordsHint = document.getElementById(coordsHintId);
+  const modeRadios = document.querySelectorAll(`input[name="${modeName}"]`);
 
   function setMode(mode) {
     const isRegion = mode === "region";
@@ -1296,8 +1305,8 @@ function wireChartLocationMode() {
     if (manualPanel) manualPanel.hidden = isRegion;
     if (countrySelect) countrySelect.required = isRegion;
     if (regionSelect) regionSelect.required = isRegion;
-    const lat = document.getElementById("lat");
-    const lon = document.getElementById("lon");
+    const lat = document.getElementById(latId);
+    const lon = document.getElementById(lonId);
     if (lat) lat.required = !isRegion;
     if (lon) lon.required = !isRegion;
   }
@@ -1349,10 +1358,44 @@ function wireChartLocationMode() {
   });
   regionSelect?.addEventListener("change", updateCoordsHint);
 
-  setMode(document.querySelector('input[name="location-mode"]:checked')?.value || "region");
+  setMode(document.querySelector(`input[name="${modeName}"]:checked`)?.value || "region");
 }
 
-wireChartLocationMode();
+wireLocationMode({
+  modeName: "location-mode",
+  regionPanelId: "location-region-fields",
+  manualPanelId: "location-manual-fields",
+  countryId: "birth-country",
+  regionId: "birth-region",
+  regionLabelId: "birth-region-label",
+  coordsHintId: "region-coords-hint",
+  latId: "lat",
+  lonId: "lon",
+});
+
+wireLocationMode({
+  modeName: "dom-location-mode",
+  regionPanelId: "dom-location-region-fields",
+  manualPanelId: "dom-location-manual-fields",
+  countryId: "dom-birth-country",
+  regionId: "dom-birth-region",
+  regionLabelId: "dom-birth-region-label",
+  coordsHintId: "dom-region-coords-hint",
+  latId: "dom-lat",
+  lonId: "dom-lon",
+});
+
+wireLocationMode({
+  modeName: "vit-location-mode",
+  regionPanelId: "vit-location-region-fields",
+  manualPanelId: "vit-location-manual-fields",
+  countryId: "vit-birth-country",
+  regionId: "vit-birth-region",
+  regionLabelId: "vit-birth-region-label",
+  coordsHintId: "vit-region-coords-hint",
+  latId: "vit-lat",
+  lonId: "vit-lon",
+});
 
 wireBirthTool({
   form: document.getElementById("dominant-form"),
@@ -1364,6 +1407,10 @@ wireBirthTool({
     time: "dom-birth-time",
     tz: "dom-tz-offset",
     house: "dom-house-system",
+    locationMode: "dom-location-mode",
+    country: "dom-birth-country",
+    region: "dom-birth-region",
+    placeRegion: "dom-place-name-region",
     place: "dom-place-name",
     lat: "dom-lat",
     lon: "dom-lon",
@@ -1381,6 +1428,10 @@ wireBirthTool({
     time: "vit-birth-time",
     tz: "vit-tz-offset",
     house: "vit-house-system",
+    locationMode: "vit-location-mode",
+    country: "vit-birth-country",
+    region: "vit-birth-region",
+    placeRegion: "vit-place-name-region",
     place: "vit-place-name",
     lat: "vit-lat",
     lon: "vit-lon",
@@ -1401,35 +1452,3 @@ wireBirthTool({
     );
   },
 });
-
-function wireDonations() {
-  const actions = document.getElementById("donate-actions");
-  const hint = document.getElementById("donate-hint");
-  if (!actions) return;
-
-  const buttons = [];
-  if (DONATION_LINKS.mercadopago) {
-    buttons.push(
-      `<a class="btn-primary" href="${DONATION_LINKS.mercadopago}" target="_blank" rel="noopener noreferrer">Donar con Mercado Pago</a>`
-    );
-  }
-  if (DONATION_LINKS.paypal) {
-    buttons.push(
-      `<a class="btn-secondary" href="${DONATION_LINKS.paypal}" target="_blank" rel="noopener noreferrer">Donar con PayPal</a>`
-    );
-  }
-
-  if (buttons.length) {
-    actions.innerHTML = buttons.join("");
-    if (hint) hint.hidden = true;
-  } else {
-    actions.innerHTML = "";
-    if (hint) {
-      hint.hidden = false;
-      hint.textContent =
-        "Falta configurar el link de donación. Creá un link en Mercado Pago o PayPal y pegalo en src/donate-config.js.";
-    }
-  }
-}
-
-wireDonations();

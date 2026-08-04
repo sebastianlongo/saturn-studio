@@ -17,8 +17,6 @@
       <a class="nav-link" href="#datos">carta</a>
       <a class="nav-link" href="#dominante-datos">dominante</a>
       <a class="nav-link" href="#vitalidad-datos">vitalidad</a>
-      <a class="nav-link" href="#donar">donar</a>
-      <a class="nav-link" href="#biblioteca">biblioteca</a>
     </nav>
   </header>
 
@@ -212,18 +210,60 @@
             <option value="placidus">Placidus</option>
           </select>
         </div>
-        <div class="field field--full">
-          <label for="dom-place-name">Lugar (texto, opcional)</label>
-          <input type="text" id="dom-place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+
+        <fieldset class="field field--full location-mode">
+          <legend class="location-mode__legend">¿Cómo ubicamos el nacimiento?</legend>
+          <div class="location-mode__options">
+            <label class="location-mode__option">
+              <input type="radio" name="dom-location-mode" id="dom-location-mode-region" value="region" checked />
+              <span>País y departamento / provincia</span>
+            </label>
+            <label class="location-mode__option">
+              <input type="radio" name="dom-location-mode" id="dom-location-mode-manual" value="manual" />
+              <span>Coordenadas manuales</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div id="dom-location-region-fields" class="location-panel field--full">
+          <div class="field field--full">
+            <label for="dom-birth-country">País de nacimiento</label>
+            <select id="dom-birth-country" name="birth-country">
+              <option value="" disabled selected>Elegí un país</option>
+              <option value="Paraguay">Paraguay</option>
+              <option value="Argentina">Argentina</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <label for="dom-birth-region" id="dom-birth-region-label">Departamento / provincia</label>
+            <select id="dom-birth-region" name="birth-region" disabled>
+              <option value="">Primero elegí un país</option>
+            </select>
+          </div>
+          <p class="location-coords-hint" id="dom-region-coords-hint" hidden></p>
+          <div class="field field--full">
+            <label for="dom-place-name-region">Ciudad o detalle (opcional)</label>
+            <input type="text" id="dom-place-name-region" name="place-name-region" autocomplete="off" placeholder="Ej. barrio o ciudad" />
+          </div>
         </div>
-        <div class="field">
-          <label for="dom-lat">Latitud (°)</label>
-          <input type="text" id="dom-lat" name="lat" inputmode="decimal" autocomplete="off" required placeholder="-25.2897" />
+
+        <div id="dom-location-manual-fields" class="location-panel field--full" hidden>
+          <div class="field field--full">
+            <label for="dom-place-name">Lugar (texto, opcional)</label>
+            <input type="text" id="dom-place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+          </div>
+          <div class="birth-form birth-form--nested">
+            <div class="field">
+              <label for="dom-lat">Latitud (°)</label>
+              <input type="text" id="dom-lat" name="lat" inputmode="decimal" autocomplete="off" placeholder="-25.2897" />
+            </div>
+            <div class="field">
+              <label for="dom-lon">Longitud (°)</label>
+              <input type="text" id="dom-lon" name="lon" inputmode="decimal" autocomplete="off" placeholder="-57.6268" />
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label for="dom-lon">Longitud (°)</label>
-          <input type="text" id="dom-lon" name="lon" inputmode="decimal" autocomplete="off" required placeholder="-57.6268" />
-        </div>
+
         <div class="field field--full">
           <button type="submit" class="btn-primary">Calcular planeta dominante</button>
         </div>
@@ -289,18 +329,60 @@
             <option value="placidus">Placidus</option>
           </select>
         </div>
-        <div class="field field--full">
-          <label for="vit-place-name">Lugar (texto, opcional)</label>
-          <input type="text" id="vit-place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+
+        <fieldset class="field field--full location-mode">
+          <legend class="location-mode__legend">¿Cómo ubicamos el nacimiento?</legend>
+          <div class="location-mode__options">
+            <label class="location-mode__option">
+              <input type="radio" name="vit-location-mode" id="vit-location-mode-region" value="region" checked />
+              <span>País y departamento / provincia</span>
+            </label>
+            <label class="location-mode__option">
+              <input type="radio" name="vit-location-mode" id="vit-location-mode-manual" value="manual" />
+              <span>Coordenadas manuales</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div id="vit-location-region-fields" class="location-panel field--full">
+          <div class="field field--full">
+            <label for="vit-birth-country">País de nacimiento</label>
+            <select id="vit-birth-country" name="birth-country">
+              <option value="" disabled selected>Elegí un país</option>
+              <option value="Paraguay">Paraguay</option>
+              <option value="Argentina">Argentina</option>
+            </select>
+          </div>
+          <div class="field field--full">
+            <label for="vit-birth-region" id="vit-birth-region-label">Departamento / provincia</label>
+            <select id="vit-birth-region" name="birth-region" disabled>
+              <option value="">Primero elegí un país</option>
+            </select>
+          </div>
+          <p class="location-coords-hint" id="vit-region-coords-hint" hidden></p>
+          <div class="field field--full">
+            <label for="vit-place-name-region">Ciudad o detalle (opcional)</label>
+            <input type="text" id="vit-place-name-region" name="place-name-region" autocomplete="off" placeholder="Ej. barrio o ciudad" />
+          </div>
         </div>
-        <div class="field">
-          <label for="vit-lat">Latitud (°)</label>
-          <input type="text" id="vit-lat" name="lat" inputmode="decimal" autocomplete="off" required placeholder="-25.2897" />
+
+        <div id="vit-location-manual-fields" class="location-panel field--full" hidden>
+          <div class="field field--full">
+            <label for="vit-place-name">Lugar (texto, opcional)</label>
+            <input type="text" id="vit-place-name" name="place-name" autocomplete="off" placeholder="Ej. Asunción" />
+          </div>
+          <div class="birth-form birth-form--nested">
+            <div class="field">
+              <label for="vit-lat">Latitud (°)</label>
+              <input type="text" id="vit-lat" name="lat" inputmode="decimal" autocomplete="off" placeholder="-25.2897" />
+            </div>
+            <div class="field">
+              <label for="vit-lon">Longitud (°)</label>
+              <input type="text" id="vit-lon" name="lon" inputmode="decimal" autocomplete="off" placeholder="-57.6268" />
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label for="vit-lon">Longitud (°)</label>
-          <input type="text" id="vit-lon" name="lon" inputmode="decimal" autocomplete="off" required placeholder="-57.6268" />
-        </div>
+
         <div class="field field--full">
           <button type="submit" class="btn-primary">Calcular años de vitalidad</button>
         </div>
@@ -330,20 +412,6 @@
       <div id="vitality-output" class="chart-output" hidden></div>
     </section>
   </main>
-
-  <section class="donate" id="donar" aria-labelledby="donar-title">
-    <h2 id="donar-title">Apoyá Saturn Studio</h2>
-    <p class="donate__lead">
-      Si la herramienta te sirve, podés invitar un café. Las donaciones ayudan a mantener el hosting y seguir mejorando la app.
-    </p>
-    <div class="donate__actions" id="donate-actions"></div>
-    <p class="donate__hint" id="donate-hint" hidden></p>
-  </section>
-
-  <section class="library" id="biblioteca">
-    <h2>Biblioteca</h2>
-    <p>Artículos, glosario y recursos sobre astrología.</p>
-  </section>
 
   <script type="module" src="/src/main.js"></script>
 </body>
