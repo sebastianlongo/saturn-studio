@@ -48,39 +48,6 @@ body {
     linear-gradient(180deg, #d6dde8 0%, var(--stone) 38%, var(--paper) 100%);
 }
 
-/* ——— Header ——— */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem clamp(1.25rem, 4vw, 2.5rem);
-  border-bottom: 1px solid rgba(28, 31, 36, 0.08);
-  background: rgba(242, 244, 247, 0.72);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
-
-.header-brand {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.header-brand:hover {
-  color: var(--bronze-deep);
-}
-
-.site-nav {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
 .btn-secondary {
   display: inline-flex;
   align-items: center;
