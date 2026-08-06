@@ -1104,7 +1104,8 @@ async function calculateChart(dateUtc, lat, lon, houseSystem) {
 function readBirthFormFields(ids) {
   const dateStr = document.getElementById(ids.date).value;
   const timeStr = document.getElementById(ids.time).value;
-  const tzOffset = Number(document.getElementById(ids.tz).value);
+  const tzRaw = document.getElementById(ids.tz).value;
+  const tzOffset = tzRaw === "" ? 0 : Number(tzRaw);
   const houseSystem = resolveHouseSystem(document.getElementById(ids.house).value);
 
   if (ids.locationMode) {
@@ -1178,7 +1179,7 @@ function validateBirthInput(input) {
   if (Number.isNaN(lon) || lon < -180 || lon > 180) {
     return "La longitud debe estar entre −180 y 180.";
   }
-  if (Number.isNaN(tzOffset)) return "Elige un huso horario.";
+  if (Number.isNaN(tzOffset)) return "El huso horario no es válido.";
   return null;
 }
 

@@ -52,7 +52,7 @@
     <section class="panel panel--visual" id="datos" aria-labelledby="datos-title">
       <h2 id="datos-title" class="panel__section-title">Datos de nacimiento</h2>
       <p class="panel__hint">
-        Introduce la <strong>hora local</strong> de nacimiento y el huso (Paraguay en verano 2000 = <strong>UTC−3</strong>; en invierno = UTC−4).
+        Introduce la <strong>hora local</strong> de nacimiento. El huso es <strong>opcional</strong> (Paraguay en verano 2000 = UTC−3; en invierno = UTC−4; si lo omitís se asume UTC±0).
         Elige el <strong>sistema de casas</strong>. Podés ubicar por <strong>país y departamento/provincia</strong> o cargar <strong>coordenadas manuales</strong>.
       </p>
       <form id="birth-form" class="birth-form" novalidate>
@@ -65,10 +65,11 @@
           <input type="time" id="birth-time" name="birth-time" step="1" required />
         </div>
         <div class="field field--full">
-          <label for="tz-offset">Huso horario</label>
-          <select id="tz-offset" name="tz-offset" required>
+          <label for="tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
+          <select id="tz-offset" name="tz-offset">
+            <option value="" selected>Sin especificar (UTC±0)</option>
             <option value="0">UTC±0</option>
-            <option value="-3" selected>UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
             <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
             <option value="-2">UTC−2</option>
             <option value="-5">UTC−5</option>
@@ -146,7 +147,7 @@
     <section class="panel panel--chart" id="carta" aria-labelledby="carta-title">
       <h2 id="carta-title" class="panel__title">carta astral</h2>
       <p class="panel__lead">
-        Posiciones eclípticas tropicales. Elige casas iguales o Placidus. Ascendente al este (bajo el horizonte). La hora local se convierte a UTC según el huso. Swiss Ephemeris (Moshier).
+        Posiciones eclípticas tropicales. Elige casas iguales o Placidus. Ascendente al este (bajo el horizonte). Si indicás huso, la hora local se convierte a UTC; si no, se asume UTC±0. Swiss Ephemeris (Moshier).
       </p>
 
       <p id="chart-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
@@ -183,10 +184,11 @@
           <input type="time" id="dom-birth-time" name="birth-time" step="1" required />
         </div>
         <div class="field field--full">
-          <label for="dom-tz-offset">Huso horario</label>
-          <select id="dom-tz-offset" name="tz-offset" required>
+          <label for="dom-tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
+          <select id="dom-tz-offset" name="tz-offset">
+            <option value="" selected>Sin especificar (UTC±0)</option>
             <option value="0">UTC±0</option>
-            <option value="-3" selected>UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
             <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
             <option value="-2">UTC−2</option>
             <option value="-5">UTC−5</option>
@@ -302,10 +304,11 @@
           <input type="time" id="vit-birth-time" name="birth-time" step="1" required />
         </div>
         <div class="field field--full">
-          <label for="vit-tz-offset">Huso horario</label>
-          <select id="vit-tz-offset" name="tz-offset" required>
+          <label for="vit-tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
+          <select id="vit-tz-offset" name="tz-offset">
+            <option value="" selected>Sin especificar (UTC±0)</option>
             <option value="0">UTC±0</option>
-            <option value="-3" selected>UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
             <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
             <option value="-2">UTC−2</option>
             <option value="-5">UTC−5</option>

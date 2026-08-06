@@ -490,6 +490,13 @@ body {
   color: var(--mist);
 }
 
+.field__optional {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: color-mix(in srgb, var(--mist) 75%, transparent);
+}
+
 .field input,
 .field select {
   width: 100%;
