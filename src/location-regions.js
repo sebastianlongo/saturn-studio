@@ -6,6 +6,7 @@
 export const LOCATION_COUNTRIES = {
   Paraguay: {
     regionLabel: "Departamento",
+    timeZone: "America/Asuncion",
     regions: [
       { id: "asuncion", name: "Asunción (capital)", lat: -25.2865, lon: -57.647 },
       { id: "concepcion", name: "Concepción", lat: -23.4064, lon: -57.4344 },
@@ -29,6 +30,7 @@ export const LOCATION_COUNTRIES = {
   },
   Argentina: {
     regionLabel: "Provincia",
+    timeZone: "America/Argentina/Buenos_Aires",
     regions: [
       { id: "caba", name: "CABA", lat: -34.6037, lon: -58.3816 },
       { id: "buenos-aires", name: "Buenos Aires", lat: -34.9215, lon: -57.9545 },
@@ -68,4 +70,78 @@ export function getRegionLabel(country) {
 
 export function findRegion(country, regionId) {
   return getCountryRegions(country).find((r) => r.id === regionId) ?? null;
+}
+
+export function getCountryTimeZone(country) {
+  return LOCATION_COUNTRIES[country]?.timeZone ?? null;
+}
+
+/**
+ * Offset UTC en horas (p. ej. -3) para una fecha/hora civil en la zona IANA.
+ * Usa las reglas históricas del navegador (DST incluido).
+ */
+export function offsetHoursForTimeZone(timeZone, dateStr, timeStr) {
+  if (!timeZone || !dateStr || !timeStr) return NaN;
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const timeParts = timeStr.split(":");
+  const hh = Number(timeParts[0] ?? 0);
+  const mm = Number(timeParts[1] ?? 0);
+  const ss = Number(timeParts[2] ?? 0);
+  if ([y, mo, d, hh, mm, ss].some((n) => Number.isNaN(n))) return NaN;
+
+  const localAsUtcMs = Date.UTC(y, mo - 1, d, hh, mm, ss);
+  let guessMs = localAsUtcMs;
+
+  for (let i = 0; i < 3; i += 1) {
+    const offsetMs = zoneOffsetMsAt(timeZone, guessMs);
+    if (Number.isNaN(offsetMs)) return NaN;
+    guessMs = localAsUtcMs - offsetMs;
+  }
+
+  const offsetMs = zoneOffsetMsAt(timeZone, guessMs);
+  if (Number.isNaN(offsetMs)) return NaN;
+  return offsetMs / 3_600_000;
+}
+
+function zoneOffsetMsAt(timeZone, utcMs) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour12: false,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(new Date(utcMs));
+
+  const map = Object.fromEntries(parts.filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
+  const hour = Number(map.hour) % 24;
+  const asUtcMs = Date.UTC(
+    Number(map.year),
+    Number(map.month) - 1,
+    Number(map.day),
+    hour,
+    Number(map.minute),
+    Number(map.second)
+  );
+  return asUtcMs - utcMs;
+}
+
+/** Fallback aproximado por longitud cuando no hay país (±15° ≈ 1 h). */
+export function estimateOffsetFromLongitude(lon) {
+  if (Number.isNaN(lon) || lon < -180 || lon > 180) return NaN;
+  return Math.round(lon / 15);
+}
+
+/**
+ * Resuelve el huso cuando el usuario no lo eligió: país (+ fecha) o longitud.
+ */
+export function resolveImplicitUtcOffset({ country, dateStr, timeStr, lon }) {
+  const zone = getCountryTimeZone(country);
+  if (zone) {
+    const fromZone = offsetHoursForTimeZone(zone, dateStr, timeStr);
+    if (!Number.isNaN(fromZone)) return fromZone;
+  }
+  return estimateOffsetFromLongitude(lon);
 }

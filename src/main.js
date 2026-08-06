@@ -1,7 +1,7 @@
 import { SwissEphemeris } from "@swisseph/browser";
 import { Planet, LunarPoint, HouseSystem } from "@swisseph/core";
 import { analyzeVitality, buildVitalityResult } from "./hyleg.js";
-import { findRegion, getCountryRegions, getRegionLabel } from "./location-regions.js";
+import { findRegion, getCountryRegions, getRegionLabel, resolveImplicitUtcOffset } from "./location-regions.js";
 
 const SIGN_NAMES = [
   "Aries",
@@ -1105,7 +1105,8 @@ function readBirthFormFields(ids) {
   const dateStr = document.getElementById(ids.date).value;
   const timeStr = document.getElementById(ids.time).value;
   const tzRaw = document.getElementById(ids.tz).value;
-  const tzOffset = tzRaw === "" ? 0 : Number(tzRaw);
+  const tzExplicit = tzRaw !== "";
+  const tzOffset = tzExplicit ? Number(tzRaw) : NaN;
   const houseSystem = resolveHouseSystem(document.getElementById(ids.house).value);
 
   if (ids.locationMode) {
@@ -1121,6 +1122,7 @@ function readBirthFormFields(ids) {
         dateStr,
         timeStr,
         tzOffset,
+        tzExplicit,
         houseSystem,
         locationMode: "region",
         placeName,
@@ -1138,6 +1140,7 @@ function readBirthFormFields(ids) {
       dateStr,
       timeStr,
       tzOffset,
+      tzExplicit,
       houseSystem,
       locationMode: "manual",
       placeName,
@@ -1158,6 +1161,7 @@ function readBirthFormFields(ids) {
     dateStr,
     timeStr,
     tzOffset,
+    tzExplicit,
     houseSystem,
     locationMode: "manual",
     placeName,
@@ -1168,8 +1172,23 @@ function readBirthFormFields(ids) {
   };
 }
 
+function applyImplicitTimezone(input) {
+  if (input.tzExplicit) return null;
+  const resolved = resolveImplicitUtcOffset({
+    country: input.country,
+    dateStr: input.dateStr,
+    timeStr: input.timeStr,
+    lon: input.lon,
+  });
+  if (Number.isNaN(resolved)) {
+    return "No se pudo inferir el huso. Elegí país o indicá el huso horario.";
+  }
+  input.tzOffset = resolved;
+  return null;
+}
+
 function validateBirthInput(input) {
-  const { dateStr, timeStr, lat, lon, tzOffset, locationMode, country, regionName } = input;
+  const { dateStr, timeStr, lat, lon, tzOffset, tzExplicit, locationMode, country, regionName } = input;
   if (!dateStr || !timeStr) return "Indica fecha y hora local.";
   if (locationMode === "region") {
     if (!country) return "Elegí el país de nacimiento.";
@@ -1179,7 +1198,7 @@ function validateBirthInput(input) {
   if (Number.isNaN(lon) || lon < -180 || lon > 180) {
     return "La longitud debe estar entre −180 y 180.";
   }
-  if (Number.isNaN(tzOffset)) return "El huso horario no es válido.";
+  if (tzExplicit && Number.isNaN(tzOffset)) return "El huso horario no es válido.";
   return null;
 }
 
@@ -1221,6 +1240,14 @@ function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
     const validationError = validateBirthInput(input);
     if (validationError) {
       error.textContent = validationError;
+      error.hidden = false;
+      empty.hidden = false;
+      return;
+    }
+
+    const tzError = applyImplicitTimezone(input);
+    if (tzError) {
+      error.textContent = tzError;
       error.hidden = false;
       empty.hidden = false;
       return;
