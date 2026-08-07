@@ -1182,25 +1182,18 @@ body {
   width: 2.5rem;
 }
 
+.body-glyph,
 .zodiac-glyph {
-  margin-right: 0.2rem;
+  margin-right: 0.25rem;
   font-size: 1.05em;
+  color: var(--ring-deep);
+  font-weight: 600;
 }
 
-.zodiac-glyph--fire {
-  color: #c0453a;
-}
-
-.zodiac-glyph--earth {
-  color: #5a8a4a;
-}
-
-.zodiac-glyph--air {
-  color: #c47a2e;
-}
-
-.zodiac-glyph--water {
-  color: #3a6fbf;
+.zodiac-name {
+  margin-right: 0.3rem;
+  color: var(--ring-deep);
+  font-weight: 600;
 }
 
 .retro-mark {

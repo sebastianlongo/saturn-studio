@@ -128,7 +128,7 @@ function formatDegreesPrecise(longitude) {
 
 function formatZodiacPosition(longitude) {
   const si = getSignIndexFromLongitude(longitude);
-  return `<span class="zodiac-glyph zodiac-glyph--${SIGN_ELEMENTS[si]}" aria-hidden="true">${SIGN_GLYPHS[si]}</span><span class="num">${formatDegreesPrecise(longitude)}</span>`;
+  return `<span class="zodiac-glyph" aria-hidden="true">${SIGN_GLYPHS[si]}</span><span class="zodiac-name">${SIGN_NAMES[si]}</span> <span class="num">${formatDegreesPrecise(longitude)}</span>`;
 }
 
 function bodyLabel(body) {
@@ -951,7 +951,7 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
       const retro = b.retrograde ? '<span class="retro-mark" title="Retrógrado">R</span>' : "";
       return `
       <tr>
-        <td class="ephem-planet">${b.glyph} ${bodyLabel(b)}</td>
+        <td class="ephem-planet"><span class="body-glyph" aria-hidden="true">${b.glyph}</span> ${bodyLabel(b)}</td>
         <td class="ephem-pos">${formatZodiacPosition(b.longitude)}${retro}</td>
         <td class="ephem-house">${b.house}</td>
       </tr>`;
