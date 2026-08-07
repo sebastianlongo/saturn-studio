@@ -736,6 +736,14 @@ body {
   opacity: 0.88;
 }
 
+.sun-wheel__houses line.sun-wheel__aspect--semisextile {
+  stroke: #a89878;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-dasharray: 2.5 2;
+  opacity: 0.8;
+}
+
 .sun-wheel__houses line.sun-wheel__aspect--quincunx {
   stroke: #6bbf78;
   stroke-width: 1.2;
@@ -966,6 +974,19 @@ body {
 
 .aspect-list--sextile .aspect-list__mark {
   background: var(--sextile);
+}
+
+.aspect-list--semisextile {
+  border: 1px solid rgba(154, 123, 79, 0.4);
+  background: rgba(154, 123, 79, 0.07);
+}
+
+.aspect-list--semisextile .aspect-list__title {
+  color: var(--bronze-deep);
+}
+
+.aspect-list--semisextile .aspect-list__mark {
+  background: var(--bronze);
 }
 
 .aspect-list--quincunx {

@@ -59,6 +59,7 @@ const WHEEL_BODY_RADIUS_FRAC = 0.62;
 
 const TRINE_ANGLE = 120;
 const SEXTILE_ANGLE = 60;
+const SEMISEXTILE_ANGLE = 30;
 const SQUARE_ANGLE = 90;
 const QUINCUNX_ANGLE = 150;
 const OPPOSITION_ANGLE = 180;
@@ -67,6 +68,16 @@ const ASPECT_ORB = 5;
 const QUINCUNX_ORB = 3;
 /** Orbe máximo para aspectos que involucran puntos matemáticos. */
 const POINT_ASPECT_ORB = 3;
+/** Orbes recomendados para aspectos al Ascendente (límite superior del rango). */
+const ASC_ASPECT_ORB = {
+  [CONJUNCTION_ANGLE]: 6,
+  [OPPOSITION_ANGLE]: 6,
+  [SQUARE_ANGLE]: 5,
+  [TRINE_ANGLE]: 5,
+  [SEXTILE_ANGLE]: 4,
+  [SEMISEXTILE_ANGLE]: 2,
+  [QUINCUNX_ANGLE]: 2,
+};
 
 const MATHEMATICAL_POINT_NAMES = new Set([
   "Lilith",
@@ -292,8 +303,11 @@ function withAscendantForAspects(bodies, ascendant, cusps) {
   return [...bodies, asc];
 }
 
-/** Orbe efectivo: puntos (Lilith, nodos, Fortuna, Infortunio) ≤ 3°. */
-function aspectOrbForPair(a, b, defaultOrb) {
+/** Orbe efectivo: Asc tiene pautas propias; puntos matemáticos ≤ 3°. */
+function aspectOrbForPair(a, b, angle, defaultOrb) {
+  if (a.name === "Ascendente" || b.name === "Ascendente") {
+    return ASC_ASPECT_ORB[angle] ?? defaultOrb;
+  }
   if (isMathematicalPoint(a) || isMathematicalPoint(b)) {
     return Math.min(defaultOrb, POINT_ASPECT_ORB);
   }
@@ -307,10 +321,12 @@ function findAspects(bodies, angle, orb = ASPECT_ORB) {
       // El eje nodal es siempre oposición; no listarlo como aspecto entre nodos.
       const names = new Set([bodies[i].name, bodies[j].name]);
       if (names.has("Nodo Norte") && names.has("Nodo Sur")) continue;
+      // Semisextil solo se usa para aspectos al Ascendente.
+      if (angle === SEMISEXTILE_ANGLE && !names.has("Ascendente")) continue;
 
       const separation = shortestArcDegrees(bodies[i].longitude, bodies[j].longitude);
       const orbUsed = Math.abs(separation - angle);
-      const maxOrb = aspectOrbForPair(bodies[i], bodies[j], orb);
+      const maxOrb = aspectOrbForPair(bodies[i], bodies[j], angle, orb);
       if (orbUsed <= maxOrb) {
         aspects.push({
           a: bodies[i],
@@ -323,6 +339,18 @@ function findAspects(bodies, angle, orb = ASPECT_ORB) {
     }
   }
   return aspects;
+}
+
+function collectAspectGroups(aspectBodies) {
+  return {
+    trines: findAspects(aspectBodies, TRINE_ANGLE, ASPECT_ORB),
+    sextiles: findAspects(aspectBodies, SEXTILE_ANGLE, ASPECT_ORB),
+    semisextiles: findAspects(aspectBodies, SEMISEXTILE_ANGLE, ASC_ASPECT_ORB[SEMISEXTILE_ANGLE]),
+    squares: findAspects(aspectBodies, SQUARE_ANGLE, ASPECT_ORB),
+    quincunxes: findAspects(aspectBodies, QUINCUNX_ANGLE, QUINCUNX_ORB),
+    oppositions: findAspects(aspectBodies, OPPOSITION_ANGLE, ASPECT_ORB),
+    conjunctions: findAspects(aspectBodies, CONJUNCTION_ANGLE, ASPECT_ORB),
+  };
 }
 
 /** Regentes modernos por signo (0 Aries … 11 Piscis). */
@@ -404,10 +432,10 @@ function houseStrengthPoints(house) {
   return { points: SCORE_HOUSE_CADENT, label: `casa ${house} cadente` };
 }
 
-function aspectToPoint(planetLon, pointLon, angle, score, label) {
+function aspectToPoint(planetLon, pointLon, angle, score, label, maxOrb = ASPECT_ORB) {
   const sep = shortestArcDegrees(planetLon, pointLon);
   const orb = Math.abs(sep - angle);
-  if (orb > ASPECT_ORB) return null;
+  if (orb > maxOrb) return null;
   return {
     points: score,
     label: `${label} (orbe ${orb.toFixed(1)}°)`,
@@ -523,7 +551,8 @@ function scoreDominantPlanets(bodies, ascendant) {
       ascendant,
       CONJUNCTION_ANGLE,
       SCORE_ASC_CONJ,
-      "conjunción al Asc"
+      "conjunción al Asc",
+      ASC_ASPECT_ORB[CONJUNCTION_ANGLE]
     );
     if (ascConj) {
       total += ascConj.points;
@@ -534,7 +563,8 @@ function scoreDominantPlanets(bodies, ascendant) {
         ascendant,
         TRINE_ANGLE,
         SCORE_ASC_TRINE,
-        "trígono al Asc"
+        "trígono al Asc",
+        ASC_ASPECT_ORB[TRINE_ANGLE]
       );
       if (ascTri) {
         total += ascTri.points;
@@ -545,7 +575,8 @@ function scoreDominantPlanets(bodies, ascendant) {
           ascendant,
           OPPOSITION_ANGLE,
           SCORE_ASC_OPP,
-          "oposición al Asc"
+          "oposición al Asc",
+          ASC_ASPECT_ORB[OPPOSITION_ANGLE]
         );
         if (ascOpp) {
           total += ascOpp.points;
@@ -750,12 +781,15 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
   }
 
   const aspectBodies = withAscendantForAspects(bodies, ascendant, cusps);
-  const trines = findAspects(aspectBodies, TRINE_ANGLE, ASPECT_ORB);
-  const sextiles = findAspects(aspectBodies, SEXTILE_ANGLE, ASPECT_ORB);
-  const squares = findAspects(aspectBodies, SQUARE_ANGLE, ASPECT_ORB);
-  const quincunxes = findAspects(aspectBodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
-  const oppositions = findAspects(aspectBodies, OPPOSITION_ANGLE, ASPECT_ORB);
-  const conjunctions = findAspects(aspectBodies, CONJUNCTION_ANGLE, ASPECT_ORB);
+  const {
+    trines,
+    sextiles,
+    semisextiles,
+    squares,
+    quincunxes,
+    oppositions,
+    conjunctions,
+  } = collectAspectGroups(aspectBodies);
   const aspectLines = [
     ...trines.map((t) => {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
@@ -766,6 +800,11 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
       const pb = polar(cx, cy, rAspect, longitudeToSvgRad(t.b.longitude, ascendant));
       return `<line class="sun-wheel__aspect sun-wheel__aspect--sextile" x1="${pa.x.toFixed(2)}" y1="${pa.y.toFixed(2)}" x2="${pb.x.toFixed(2)}" y2="${pb.y.toFixed(2)}" />`;
+    }),
+    ...semisextiles.map((t) => {
+      const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
+      const pb = polar(cx, cy, rAspect, longitudeToSvgRad(t.b.longitude, ascendant));
+      return `<line class="sun-wheel__aspect sun-wheel__aspect--semisextile" x1="${pa.x.toFixed(2)}" y1="${pa.y.toFixed(2)}" x2="${pb.x.toFixed(2)}" y2="${pb.y.toFixed(2)}" />`;
     }),
     ...squares.map((t) => {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
@@ -870,23 +909,33 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
 
 function buildAspectLists(bodies, ascendant, cusps) {
   const aspectBodies = withAscendantForAspects(bodies, ascendant, cusps);
-  const trines = findAspects(aspectBodies, TRINE_ANGLE, ASPECT_ORB);
-  const sextiles = findAspects(aspectBodies, SEXTILE_ANGLE, ASPECT_ORB);
-  const squares = findAspects(aspectBodies, SQUARE_ANGLE, ASPECT_ORB);
-  const quincunxes = findAspects(aspectBodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
-  const oppositions = findAspects(aspectBodies, OPPOSITION_ANGLE, ASPECT_ORB);
-  const conjunctions = findAspects(aspectBodies, CONJUNCTION_ANGLE, ASPECT_ORB);
+  const {
+    trines,
+    sextiles,
+    semisextiles,
+    squares,
+    quincunxes,
+    oppositions,
+    conjunctions,
+  } = collectAspectGroups(aspectBodies);
 
   return `
     <div class="result-block">
       <h2 class="result-heading">Aspectos</h2>
       ${buildAspectList(trines, "Trígono", "trine")}
       ${buildAspectList(sextiles, "Sextil", "sextile")}
+      ${buildAspectList(semisextiles, "Semisextil (Asc)", "semisextile", ASC_ASPECT_ORB[SEMISEXTILE_ANGLE])}
       ${buildAspectList(squares, "Cuadratura", "square")}
       ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
       ${buildAspectList(oppositions, "Oposición", "opposition")}
       ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
-      <p class="cusps-note">Aspectos al Ascendente: orbe ≤ ${ASPECT_ORB}°. Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.</p>
+      <p class="cusps-note">
+        Aspectos al Ascendente: conjunción/oposición ≤ ${ASC_ASPECT_ORB[CONJUNCTION_ANGLE]}°;
+        trígono/cuadratura ≤ ${ASC_ASPECT_ORB[TRINE_ANGLE]}°;
+        sextil ≤ ${ASC_ASPECT_ORB[SEXTILE_ANGLE]}°;
+        semisextil/quincuncio ≤ ${ASC_ASPECT_ORB[QUINCUNX_ANGLE]}°.
+        Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.
+      </p>
     </div>
   `;
 }
