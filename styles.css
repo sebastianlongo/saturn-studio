@@ -403,10 +403,7 @@ body {
   font-size: 0.85rem;
   color: var(--mist);
   line-height: 1.5;
-  text-align: center;
-  text-wrap: pretty;
-  max-width: 38rem;
-  margin-inline: auto;
+  text-align: left;
 }
 
 .birth-form {
