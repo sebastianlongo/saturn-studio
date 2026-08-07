@@ -1,4 +1,4 @@
-import { SwissEphemeris } from "@swisseph/browser";
+﻿import { SwissEphemeris } from "@swisseph/browser";
 import { Planet, LunarPoint, HouseSystem } from "@swisseph/core";
 import { analyzeVitality, buildVitalityResult } from "./hyleg.js";
 import { findRegion, getCountryRegions, getRegionLabel, resolveImplicitUtcOffset } from "./location-regions.js";
@@ -68,8 +68,8 @@ const ASPECT_ORB = 5;
 const QUINCUNX_ORB = 3;
 /** Orbe máximo para aspectos que involucran puntos matemáticos. */
 const POINT_ASPECT_ORB = 3;
-/** Orbes recomendados para aspectos al Ascendente (límite superior del rango). */
-const ASC_ASPECT_ORB = {
+/** Orbes recomendados para aspectos a ángulos (Asc / MC). */
+const ANGLE_ASPECT_ORB = {
   [CONJUNCTION_ANGLE]: 6,
   [OPPOSITION_ANGLE]: 6,
   [SQUARE_ANGLE]: 5,
@@ -297,16 +297,23 @@ function isMathematicalPoint(body) {
   return MATHEMATICAL_POINT_NAMES.has(body.name) || body.kind === "lot";
 }
 
-/** Cuerpos + Ascendente para aspectos (no se muestra en la tabla de planetas). */
-function withAscendantForAspects(bodies, ascendant, cusps) {
-  const asc = makeBodyEntry("Ascendente", "Asc", ascendant, cusps, { kind: "angle" });
-  return [...bodies, asc];
+function isChartAngle(body) {
+  return body.kind === "angle";
 }
 
-/** Orbe efectivo: Asc tiene pautas propias; puntos matemáticos ≤ 3°. */
+/** Cuerpos + Asc/MC para aspectos (no se muestran en la tabla de planetas). */
+function withAnglesForAspects(bodies, { ascendant, mc, cusps }) {
+  return [
+    ...bodies,
+    makeBodyEntry("Ascendente", "Asc", ascendant, cusps, { kind: "angle" }),
+    makeBodyEntry("Medio cielo", "MC", mc, cusps, { kind: "angle" }),
+  ];
+}
+
+/** Orbe efectivo: ángulos (Asc/MC) tienen pautas propias; puntos matemáticos ≤ 3°. */
 function aspectOrbForPair(a, b, angle, defaultOrb) {
-  if (a.name === "Ascendente" || b.name === "Ascendente") {
-    return ASC_ASPECT_ORB[angle] ?? defaultOrb;
+  if (isChartAngle(a) || isChartAngle(b)) {
+    return ANGLE_ASPECT_ORB[angle] ?? defaultOrb;
   }
   if (isMathematicalPoint(a) || isMathematicalPoint(b)) {
     return Math.min(defaultOrb, POINT_ASPECT_ORB);
@@ -321,8 +328,16 @@ function findAspects(bodies, angle, orb = ASPECT_ORB) {
       // El eje nodal es siempre oposición; no listarlo como aspecto entre nodos.
       const names = new Set([bodies[i].name, bodies[j].name]);
       if (names.has("Nodo Norte") && names.has("Nodo Sur")) continue;
-      // Semisextil solo se usa para aspectos al Ascendente.
-      if (angle === SEMISEXTILE_ANGLE && !names.has("Ascendente")) continue;
+      // No listar aspectos entre ángulos (Asc–MC suele ser ~cuadratura).
+      if (isChartAngle(bodies[i]) && isChartAngle(bodies[j])) continue;
+      // Semisextil solo para aspectos a Asc/MC.
+      if (
+        angle === SEMISEXTILE_ANGLE &&
+        !isChartAngle(bodies[i]) &&
+        !isChartAngle(bodies[j])
+      ) {
+        continue;
+      }
 
       const separation = shortestArcDegrees(bodies[i].longitude, bodies[j].longitude);
       const orbUsed = Math.abs(separation - angle);
@@ -345,7 +360,11 @@ function collectAspectGroups(aspectBodies) {
   return {
     trines: findAspects(aspectBodies, TRINE_ANGLE, ASPECT_ORB),
     sextiles: findAspects(aspectBodies, SEXTILE_ANGLE, ASPECT_ORB),
-    semisextiles: findAspects(aspectBodies, SEMISEXTILE_ANGLE, ASC_ASPECT_ORB[SEMISEXTILE_ANGLE]),
+    semisextiles: findAspects(
+      aspectBodies,
+      SEMISEXTILE_ANGLE,
+      ANGLE_ASPECT_ORB[SEMISEXTILE_ANGLE]
+    ),
     squares: findAspects(aspectBodies, SQUARE_ANGLE, ASPECT_ORB),
     quincunxes: findAspects(aspectBodies, QUINCUNX_ANGLE, QUINCUNX_ORB),
     oppositions: findAspects(aspectBodies, OPPOSITION_ANGLE, ASPECT_ORB),
@@ -552,7 +571,7 @@ function scoreDominantPlanets(bodies, ascendant) {
       CONJUNCTION_ANGLE,
       SCORE_ASC_CONJ,
       "conjunción al Asc",
-      ASC_ASPECT_ORB[CONJUNCTION_ANGLE]
+      ANGLE_ASPECT_ORB[CONJUNCTION_ANGLE]
     );
     if (ascConj) {
       total += ascConj.points;
@@ -564,7 +583,7 @@ function scoreDominantPlanets(bodies, ascendant) {
         TRINE_ANGLE,
         SCORE_ASC_TRINE,
         "trígono al Asc",
-        ASC_ASPECT_ORB[TRINE_ANGLE]
+        ANGLE_ASPECT_ORB[TRINE_ANGLE]
       );
       if (ascTri) {
         total += ascTri.points;
@@ -576,7 +595,7 @@ function scoreDominantPlanets(bodies, ascendant) {
           OPPOSITION_ANGLE,
           SCORE_ASC_OPP,
           "oposición al Asc",
-          ASC_ASPECT_ORB[OPPOSITION_ANGLE]
+          ANGLE_ASPECT_ORB[OPPOSITION_ANGLE]
         );
         if (ascOpp) {
           total += ascOpp.points;
@@ -730,7 +749,7 @@ function annularSectorPath(cx, cy, rInner, rOuter, lonStart, lonEnd, ascendant) 
   ].join(" ");
 }
 
-function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
+function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = [], mc) {
   const cx = 100;
   const cy = 100;
   const rOuter = 99;
@@ -780,7 +799,7 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
     );
   }
 
-  const aspectBodies = withAscendantForAspects(bodies, ascendant, cusps);
+  const aspectBodies = withAnglesForAspects(bodies, { ascendant, mc, cusps });
   const {
     trines,
     sextiles,
@@ -866,7 +885,7 @@ function buildAspectList(aspects, title, modClass, orb = ASPECT_ORB) {
   `;
 }
 
-function buildSunWheel(signIndex, bodies, cusps, ascendant) {
+function buildSunWheel(signIndex, bodies, cusps, ascendant, mc) {
   const signs = SIGN_NAMES.map((name, i) => {
     const { x, y } = longitudeToPercentPos(i * 30 + 15, ascendant, WHEEL_SIGN_RADIUS_FRAC);
     const element = SIGN_ELEMENTS[i];
@@ -899,7 +918,7 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
   return `
     <div class="sun-wheel">
       <div class="sun-wheel__ring">
-        ${buildWheelSvg(cusps, ascendant, signIndex, bodies)}
+        ${buildWheelSvg(cusps, ascendant, signIndex, bodies, mc)}
         ${signs}
         ${bodyItems}
       </div>
@@ -907,8 +926,8 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
   `;
 }
 
-function buildAspectLists(bodies, ascendant, cusps) {
-  const aspectBodies = withAscendantForAspects(bodies, ascendant, cusps);
+function buildAspectLists(bodies, ascendant, cusps, mc) {
+  const aspectBodies = withAnglesForAspects(bodies, { ascendant, mc, cusps });
   const {
     trines,
     sextiles,
@@ -924,16 +943,16 @@ function buildAspectLists(bodies, ascendant, cusps) {
       <h2 class="result-heading">Aspectos</h2>
       ${buildAspectList(trines, "Trígono", "trine")}
       ${buildAspectList(sextiles, "Sextil", "sextile")}
-      ${buildAspectList(semisextiles, "Semisextil (Asc)", "semisextile", ASC_ASPECT_ORB[SEMISEXTILE_ANGLE])}
+      ${buildAspectList(semisextiles, "Semisextil (Asc/MC)", "semisextile", ANGLE_ASPECT_ORB[SEMISEXTILE_ANGLE])}
       ${buildAspectList(squares, "Cuadratura", "square")}
       ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
       ${buildAspectList(oppositions, "Oposición", "opposition")}
       ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
       <p class="cusps-note">
-        Aspectos al Ascendente: conjunción/oposición ≤ ${ASC_ASPECT_ORB[CONJUNCTION_ANGLE]}°;
-        trígono/cuadratura ≤ ${ASC_ASPECT_ORB[TRINE_ANGLE]}°;
-        sextil ≤ ${ASC_ASPECT_ORB[SEXTILE_ANGLE]}°;
-        semisextil/quincuncio ≤ ${ASC_ASPECT_ORB[QUINCUNX_ANGLE]}°.
+        Aspectos al Ascendente y Medio cielo: conjunción/oposición ≤ ${ANGLE_ASPECT_ORB[CONJUNCTION_ANGLE]}°;
+        trígono/cuadratura ≤ ${ANGLE_ASPECT_ORB[TRINE_ANGLE]}°;
+        sextil ≤ ${ANGLE_ASPECT_ORB[SEXTILE_ANGLE]}°;
+        semisextil/quincuncio ≤ ${ANGLE_ASPECT_ORB[QUINCUNX_ANGLE]}°.
         Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.
       </p>
     </div>
@@ -1083,10 +1102,10 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
     </div>
     <div class="result-block">
       <h2 class="result-heading">Carta natal</h2>
-      ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant)}
+      ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant, houses.mc)}
     </div>
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
-    ${buildAspectLists(bodies, houses.ascendant, houses.cusps)}
+    ${buildAspectLists(bodies, houses.ascendant, houses.cusps, houses.mc)}
   `;
 }
 
