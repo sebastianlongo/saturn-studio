@@ -144,24 +144,8 @@
       </form>
     </section>
 
-    <section class="panel panel--chart" id="carta" aria-labelledby="carta-title">
-      <h2 id="carta-title" class="panel__title">carta astral</h2>
-      <p class="panel__lead">
-        Posiciones eclípticas tropicales. Elige casas iguales o Placidus. Ascendente al este (bajo el horizonte). Si indicás huso se usa ese; si no, se infiere del país (o de la longitud en modo manual). Swiss Ephemeris (Moshier).
-      </p>
-
+    <section class="panel panel--chart" id="carta" hidden>
       <p id="chart-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
-
-      <div id="chart-empty" class="chart-surface chart-surface--idle" aria-hidden="false">
-        <svg class="chart-ring" viewBox="0 0 200 200" aria-hidden="true">
-          <ellipse cx="100" cy="100" rx="94" ry="28" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.35" transform="rotate(-18 100 100)" />
-          <ellipse cx="100" cy="100" rx="82" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-18 100 100)" />
-          <circle cx="100" cy="100" r="38" fill="#2f4a6e" stroke="currentColor" stroke-width="1" opacity="0.9" />
-          <ellipse cx="90" cy="90" rx="12" ry="8" fill="#6b8cbe" opacity="0.35" />
-        </svg>
-        <span class="chart-surface__label">Rellena el formulario y pulsa calcular</span>
-      </div>
-
       <div id="chart-output" class="chart-output" hidden></div>
     </section>
   </main>
@@ -263,26 +247,8 @@
       </form>
     </section>
 
-    <section class="panel panel--chart" id="dominante-resultado" aria-labelledby="dominante-title">
-      <h2 id="dominante-title" class="panel__title">resultado</h2>
-      <p class="panel__lead">
-        Método ponderado: casa angular (+5), sucedente (+3), cadente (+1); regente del Asc (+6);
-        domicilio (+5); exaltación (+4); conjunción a Sol/Luna (+4); trígono, cuadratura u oposición a Sol/Luna (+2);
-        conjunción al Asc (+4); trígono u oposición al Asc (+2). Cuadratura al Asc: sin puntos.
-      </p>
-
+    <section class="panel panel--chart" id="dominante-resultado" hidden>
       <p id="dominant-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
-
-      <div id="dominant-empty" class="chart-surface chart-surface--idle" aria-hidden="false">
-        <svg class="chart-ring" viewBox="0 0 200 200" aria-hidden="true">
-          <ellipse cx="100" cy="100" rx="94" ry="28" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.35" transform="rotate(-18 100 100)" />
-          <ellipse cx="100" cy="100" rx="82" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-18 100 100)" />
-          <circle cx="100" cy="100" r="38" fill="#2f4a6e" stroke="currentColor" stroke-width="1" opacity="0.9" />
-          <ellipse cx="90" cy="90" rx="12" ry="8" fill="#6b8cbe" opacity="0.35" />
-        </svg>
-        <span class="chart-surface__label">Rellena el formulario y pulsa calcular</span>
-      </div>
-
       <div id="dominant-output" class="chart-output" hidden></div>
     </section>
   </main>
@@ -383,26 +349,8 @@
       </form>
     </section>
 
-    <section class="panel panel--chart" id="vitalidad-resultado" aria-labelledby="vitalidad-title">
-      <h2 id="vitalidad-title" class="panel__title">resultado</h2>
-      <p class="panel__lead">
-        Hyleg (dador de vida), Alcoccoden (dador de años) y estimación por años menores / medios / mayores,
-        con sumas de benéficos y restas de maléficos. Orbes por planeta (p. ej. Júpiter 9°, Sol 12°).
-        Si no hay Hyleg, verás 3ª Differentia: es un resultado del método, no un fallo.
-      </p>
-
+    <section class="panel panel--chart" id="vitalidad-resultado" hidden>
       <p id="vitality-error" class="chart-msg chart-msg--error" role="alert" hidden></p>
-
-      <div id="vitality-empty" class="chart-surface chart-surface--idle" aria-hidden="false">
-        <svg class="chart-ring" viewBox="0 0 200 200" aria-hidden="true">
-          <ellipse cx="100" cy="100" rx="94" ry="28" fill="none" stroke="currentColor" stroke-width="2.2" opacity="0.35" transform="rotate(-18 100 100)" />
-          <ellipse cx="100" cy="100" rx="82" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5" transform="rotate(-18 100 100)" />
-          <circle cx="100" cy="100" r="38" fill="#2f4a6e" stroke="currentColor" stroke-width="1" opacity="0.9" />
-          <ellipse cx="90" cy="90" rx="12" ry="8" fill="#6b8cbe" opacity="0.35" />
-        </svg>
-        <span class="chart-surface__label">Rellena el formulario y pulsa calcular</span>
-      </div>
-
       <div id="vitality-output" class="chart-output" hidden></div>
     </section>
   </main>

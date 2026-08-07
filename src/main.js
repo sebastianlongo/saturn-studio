@@ -1226,22 +1226,22 @@ function birthInputToUtc({
   return { dateUtc, localLabel, placeLabel };
 }
 
-function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
+function wireBirthTool({ form, output, panel, error, fieldIds, buildResult }) {
   const submitBtn = form?.querySelector('button[type="submit"]');
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     error.hidden = true;
     error.textContent = "";
-    empty.hidden = true;
     output.innerHTML = "";
     output.hidden = true;
+    if (panel) panel.hidden = true;
 
     const input = readBirthFormFields(fieldIds);
     const validationError = validateBirthInput(input);
     if (validationError) {
       error.textContent = validationError;
       error.hidden = false;
-      empty.hidden = false;
+      if (panel) panel.hidden = false;
       return;
     }
 
@@ -1249,7 +1249,7 @@ function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
     if (tzError) {
       error.textContent = tzError;
       error.hidden = false;
-      empty.hidden = false;
+      if (panel) panel.hidden = false;
       return;
     }
 
@@ -1274,12 +1274,13 @@ function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
         input.houseSystem
       );
       output.hidden = false;
+      if (panel) panel.hidden = false;
     } catch (err) {
       console.error(err);
       error.textContent =
         err instanceof Error ? err.message : "Error al calcular.";
       error.hidden = false;
-      empty.hidden = false;
+      if (panel) panel.hidden = false;
     } finally {
       submitBtn.disabled = false;
       submitBtn.removeAttribute("aria-busy");
@@ -1290,7 +1291,7 @@ function wireBirthTool({ form, output, empty, error, fieldIds, buildResult }) {
 wireBirthTool({
   form: document.getElementById("birth-form"),
   output: document.getElementById("chart-output"),
-  empty: document.getElementById("chart-empty"),
+  panel: document.getElementById("carta"),
   error: document.getElementById("chart-error"),
   fieldIds: {
     date: "birth-date",
@@ -1428,7 +1429,7 @@ wireLocationMode({
 wireBirthTool({
   form: document.getElementById("dominant-form"),
   output: document.getElementById("dominant-output"),
-  empty: document.getElementById("dominant-empty"),
+  panel: document.getElementById("dominante-resultado"),
   error: document.getElementById("dominant-error"),
   fieldIds: {
     date: "dom-birth-date",
@@ -1449,7 +1450,7 @@ wireBirthTool({
 wireBirthTool({
   form: document.getElementById("vitality-form"),
   output: document.getElementById("vitality-output"),
-  empty: document.getElementById("vitality-empty"),
+  panel: document.getElementById("vitalidad-resultado"),
   error: document.getElementById("vitality-error"),
   fieldIds: {
     date: "vit-birth-date",
