@@ -303,10 +303,14 @@ function isChartAngle(body) {
 
 /** Cuerpos + Asc/MC para aspectos (no se muestran en la tabla de planetas). */
 function withAnglesForAspects(bodies, { ascendant, mc, cusps }) {
+  const ascLon = normalizeLongitude(ascendant);
+  const mcLon = normalizeLongitude(
+    Number.isFinite(mc) ? mc : cusps?.[10]
+  );
   return [
     ...bodies,
-    makeBodyEntry("Ascendente", "Asc", ascendant, cusps, { kind: "angle" }),
-    makeBodyEntry("Medio cielo", "MC", mc, cusps, { kind: "angle" }),
+    makeBodyEntry("Ascendente", "Asc", ascLon, cusps, { kind: "angle" }),
+    makeBodyEntry("Medio cielo", "MC", mcLon, cusps, { kind: "angle" }),
   ];
 }
 
@@ -1031,7 +1035,7 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
       <tr>
         <td class="ephem-planet"><span class="body-glyph" aria-hidden="true">${b.glyph}\uFE0E</span> ${bodyLabel(b)}</td>
         <td class="ephem-pos">${formatZodiacPosition(b.longitude)}${retro}</td>
-        <td class="ephem-house">${b.house}</td>
+        <td class="ephem-house"><span class="num">${b.house}</span></td>
       </tr>`;
     })
     .join("");
@@ -1041,7 +1045,8 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
     const lon = normalizeLongitude(houses.cusps[house]);
     let label = `Casa ${house}`;
     if (house === 1) label = "Casa 1 (AC)";
-    if (house === 10) label = "Casa 10 (MC)";
+    // Solo en Placidus la cúspide 10 coincide con el MC; en iguales el MC “flota”.
+    if (house === 10 && houseSystem.id === "placidus") label = "Casa 10 (MC)";
     return `
       <tr>
         <td>${label}</td>
@@ -1087,6 +1092,10 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
   const signIndex = getSignIndexFromLongitude(sun.longitude);
   const tzLabel = tzOffset === 0 ? "UTC±0" : `UTC${tzOffset > 0 ? "+" : ""}${tzOffset}`;
   const sectLabel = fortune?.isDayChart ? "diurna" : "nocturna";
+  const ascLon = normalizeLongitude(houses.ascendant);
+  const mcLon = normalizeLongitude(
+    Number.isFinite(houses.mc) ? houses.mc : houses.cusps[10]
+  );
 
   return `
     <div class="result-block">
@@ -1096,16 +1105,18 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
         <dt>Hora local</dt><dd>${localLabel} (${tzLabel})</dd>
         <dt>Equivalente UTC</dt><dd>${dateUtcStr}</dd>
         <dt>Sistema de casas</dt><dd>${houseSystem.label}</dd>
+        <dt>Ascendente</dt><dd>${formatZodiacPosition(ascLon)}</dd>
+        <dt>Medio cielo</dt><dd>${formatZodiacPosition(mcLon)}</dd>
         <dt>P. Fortuna</dt><dd>${fortune.sign} <span class="num">${fortune.degreesInSign}</span> · casa ${fortune.house} <span class="meta-note">(${sectLabel}: ${fortune.formula})</span></dd>
         <dt>P. Infortunio</dt><dd>${infortune.sign} <span class="num">${infortune.degreesInSign}</span> · casa ${infortune.house} <span class="meta-note">(${sectLabel}: ${infortune.formula})</span></dd>
       </dl>
     </div>
     <div class="result-block">
       <h2 class="result-heading">Carta natal</h2>
-      ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant, houses.mc)}
+      ${buildSunWheel(signIndex, bodies, houses.cusps, ascLon, mcLon)}
     </div>
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
-    ${buildAspectLists(bodies, houses.ascendant, houses.cusps, houses.mc)}
+    ${buildAspectLists(bodies, ascLon, houses.cusps, mcLon)}
   `;
 }
 
@@ -1116,6 +1127,8 @@ async function calculateChart(dateUtc, lat, lon, houseSystem) {
   const cusps = buildHouseCusps(angles.ascendant, angles.cusps, houseSystem.id);
   const houses = {
     ...angles,
+    ascendant: normalizeLongitude(angles.ascendant),
+    mc: normalizeLongitude(angles.mc),
     cusps,
   };
 
