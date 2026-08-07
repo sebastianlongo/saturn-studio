@@ -1188,6 +1188,9 @@ body {
   font-size: 1.05em;
   color: var(--ring-deep);
   font-weight: 600;
+  font-family: "Segoe UI Symbol", "Noto Sans Symbols", var(--font-body), sans-serif;
+  font-variant-emoji: text;
+  font-style: normal;
 }
 
 .zodiac-name {

@@ -18,7 +18,9 @@ const SIGN_NAMES = [
   "Piscis",
 ];
 
-const SIGN_GLYPHS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+const SIGN_GLYPHS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"].map(
+  (g) => `${g}\uFE0E`
+);
 
 /** Elemento por signo: 0 fuego, 1 tierra, 2 aire, 3 agua */
 const SIGN_ELEMENTS = [
@@ -282,6 +284,12 @@ function shortestArcDegrees(lonA, lonB) {
 
 function isMathematicalPoint(body) {
   return MATHEMATICAL_POINT_NAMES.has(body.name) || body.kind === "lot";
+}
+
+/** Cuerpos + Ascendente para aspectos (no se muestra en la tabla de planetas). */
+function withAscendantForAspects(bodies, ascendant, cusps) {
+  const asc = makeBodyEntry("Ascendente", "Asc", ascendant, cusps, { kind: "angle" });
+  return [...bodies, asc];
 }
 
 /** Orbe efectivo: puntos (Lilith, nodos, Fortuna, Infortunio) ≤ 3°. */
@@ -741,12 +749,13 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = []) {
     );
   }
 
-  const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
-  const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
-  const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
-  const quincunxes = findAspects(bodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
-  const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
-  const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
+  const aspectBodies = withAscendantForAspects(bodies, ascendant, cusps);
+  const trines = findAspects(aspectBodies, TRINE_ANGLE, ASPECT_ORB);
+  const sextiles = findAspects(aspectBodies, SEXTILE_ANGLE, ASPECT_ORB);
+  const squares = findAspects(aspectBodies, SQUARE_ANGLE, ASPECT_ORB);
+  const quincunxes = findAspects(aspectBodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
+  const oppositions = findAspects(aspectBodies, OPPOSITION_ANGLE, ASPECT_ORB);
+  const conjunctions = findAspects(aspectBodies, CONJUNCTION_ANGLE, ASPECT_ORB);
   const aspectLines = [
     ...trines.map((t) => {
       const pa = polar(cx, cy, rAspect, longitudeToSvgRad(t.a.longitude, ascendant));
@@ -859,13 +868,14 @@ function buildSunWheel(signIndex, bodies, cusps, ascendant) {
   `;
 }
 
-function buildAspectLists(bodies) {
-  const trines = findAspects(bodies, TRINE_ANGLE, ASPECT_ORB);
-  const sextiles = findAspects(bodies, SEXTILE_ANGLE, ASPECT_ORB);
-  const squares = findAspects(bodies, SQUARE_ANGLE, ASPECT_ORB);
-  const quincunxes = findAspects(bodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
-  const oppositions = findAspects(bodies, OPPOSITION_ANGLE, ASPECT_ORB);
-  const conjunctions = findAspects(bodies, CONJUNCTION_ANGLE, ASPECT_ORB);
+function buildAspectLists(bodies, ascendant, cusps) {
+  const aspectBodies = withAscendantForAspects(bodies, ascendant, cusps);
+  const trines = findAspects(aspectBodies, TRINE_ANGLE, ASPECT_ORB);
+  const sextiles = findAspects(aspectBodies, SEXTILE_ANGLE, ASPECT_ORB);
+  const squares = findAspects(aspectBodies, SQUARE_ANGLE, ASPECT_ORB);
+  const quincunxes = findAspects(aspectBodies, QUINCUNX_ANGLE, QUINCUNX_ORB);
+  const oppositions = findAspects(aspectBodies, OPPOSITION_ANGLE, ASPECT_ORB);
+  const conjunctions = findAspects(aspectBodies, CONJUNCTION_ANGLE, ASPECT_ORB);
 
   return `
     <div class="result-block">
@@ -876,7 +886,7 @@ function buildAspectLists(bodies) {
       ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
       ${buildAspectList(oppositions, "Oposición", "opposition")}
       ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
-      <p class="cusps-note">Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.</p>
+      <p class="cusps-note">Aspectos al Ascendente: orbe ≤ ${ASPECT_ORB}°. Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.</p>
     </div>
   `;
 }
@@ -951,7 +961,7 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
       const retro = b.retrograde ? '<span class="retro-mark" title="Retrógrado">R</span>' : "";
       return `
       <tr>
-        <td class="ephem-planet"><span class="body-glyph" aria-hidden="true">${b.glyph}</span> ${bodyLabel(b)}</td>
+        <td class="ephem-planet"><span class="body-glyph" aria-hidden="true">${b.glyph}\uFE0E</span> ${bodyLabel(b)}</td>
         <td class="ephem-pos">${formatZodiacPosition(b.longitude)}${retro}</td>
         <td class="ephem-house">${b.house}</td>
       </tr>`;
@@ -1027,7 +1037,7 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
       ${buildSunWheel(signIndex, bodies, houses.cusps, houses.ascendant)}
     </div>
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
-    ${buildAspectLists(bodies)}
+    ${buildAspectLists(bodies, houses.ascendant, houses.cusps)}
   `;
 }
 
