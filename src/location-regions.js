@@ -1,5 +1,5 @@
 /**
- * Coordenadas aproximadas de capitales de departamento (PY) / provincia (AR).
+ * Coordenadas aproximadas de capitales de departamento (PY/UY) / provincia (AR).
  * Suficiente para carta natal a nivel regional cuando no hay ciudad exacta.
  */
 
@@ -56,6 +56,31 @@ export const LOCATION_COUNTRIES = {
       { id: "santiago-del-estero", name: "Santiago del Estero", lat: -27.7951, lon: -64.2615 },
       { id: "tierra-del-fuego", name: "Tierra del Fuego", lat: -54.8019, lon: -68.303 },
       { id: "tucuman", name: "Tucumán", lat: -26.8083, lon: -65.2176 },
+    ],
+  },
+  Uruguay: {
+    regionLabel: "Departamento",
+    timeZone: "America/Montevideo",
+    regions: [
+      { id: "montevideo", name: "Montevideo (capital)", lat: -34.9011, lon: -56.1645 },
+      { id: "artigas", name: "Artigas", lat: -30.4, lon: -56.4667 },
+      { id: "canelones", name: "Canelones", lat: -34.5228, lon: -56.2778 },
+      { id: "cerro-largo", name: "Cerro Largo", lat: -32.37, lon: -54.2 },
+      { id: "colonia", name: "Colonia", lat: -34.4714, lon: -57.8442 },
+      { id: "durazno", name: "Durazno", lat: -33.3806, lon: -56.5236 },
+      { id: "flores", name: "Flores", lat: -33.5167, lon: -56.9 },
+      { id: "florida", name: "Florida", lat: -34.0956, lon: -56.2142 },
+      { id: "lavalleja", name: "Lavalleja", lat: -34.3759, lon: -55.2377 },
+      { id: "maldonado", name: "Maldonado", lat: -34.9, lon: -54.95 },
+      { id: "paysandu", name: "Paysandú", lat: -32.3214, lon: -58.0756 },
+      { id: "rio-negro", name: "Río Negro", lat: -33.1325, lon: -58.2958 },
+      { id: "rivera", name: "Rivera", lat: -30.9053, lon: -55.5508 },
+      { id: "rocha", name: "Rocha", lat: -34.4833, lon: -54.3333 },
+      { id: "salto", name: "Salto", lat: -31.3833, lon: -57.9667 },
+      { id: "san-jose", name: "San José", lat: -34.3375, lon: -56.7136 },
+      { id: "soriano", name: "Soriano", lat: -33.2524, lon: -58.0305 },
+      { id: "tacuarembo", name: "Tacuarembó", lat: -31.7333, lon: -55.9833 },
+      { id: "treinta-y-tres", name: "Treinta y Tres", lat: -33.2333, lon: -54.3833 },
     ],
   },
 };
