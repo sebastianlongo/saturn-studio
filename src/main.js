@@ -190,7 +190,7 @@ const HOUSE_SYSTEM_OPTIONS = {
 };
 
 function resolveHouseSystem(id) {
-  return HOUSE_SYSTEM_OPTIONS[id] ?? HOUSE_SYSTEM_OPTIONS.equal;
+  return HOUSE_SYSTEM_OPTIONS[id] ?? HOUSE_SYSTEM_OPTIONS.placidus;
 }
 
 function buildHouseCusps(ascendant, seCusps, systemId) {
