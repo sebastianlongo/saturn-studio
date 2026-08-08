@@ -64,26 +64,6 @@
           <label for="birth-time">Hora (local)</label>
           <input type="time" id="birth-time" name="birth-time" step="1" required />
         </div>
-        <div class="field field--full">
-          <label for="tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
-          <select id="tz-offset" name="tz-offset">
-            <option value="" selected>Sin especificar (según país)</option>
-            <option value="0">UTC±0</option>
-            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
-            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
-            <option value="-2">UTC−2</option>
-            <option value="-5">UTC−5</option>
-            <option value="1">UTC+1</option>
-            <option value="2">UTC+2</option>
-          </select>
-        </div>
-        <div class="field field--full">
-          <label for="house-system">Sistema de casas</label>
-          <select id="house-system" name="house-system" required>
-            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
-            <option value="placidus">Placidus</option>
-          </select>
-        </div>
 
         <fieldset class="field field--full location-mode">
           <legend class="location-mode__legend">¿Cómo ubicamos el nacimiento?</legend>
@@ -139,6 +119,27 @@
         </div>
 
         <div class="field field--full">
+          <label for="tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
+          <select id="tz-offset" name="tz-offset">
+            <option value="" selected>Sin especificar (según país)</option>
+            <option value="0">UTC±0</option>
+            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
+            <option value="-2">UTC−2</option>
+            <option value="-5">UTC−5</option>
+            <option value="1">UTC+1</option>
+            <option value="2">UTC+2</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="house-system">Sistema de casas</label>
+          <select id="house-system" name="house-system" required>
+            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
+            <option value="placidus">Placidus</option>
+          </select>
+        </div>
+
+        <div class="field field--full">
           <button type="submit" class="btn-primary">Calcular carta astral</button>
         </div>
       </form>
@@ -166,26 +167,6 @@
         <div class="field">
           <label for="dom-birth-time">Hora (local)</label>
           <input type="time" id="dom-birth-time" name="birth-time" step="1" required />
-        </div>
-        <div class="field field--full">
-          <label for="dom-tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
-          <select id="dom-tz-offset" name="tz-offset">
-            <option value="" selected>Sin especificar (según país)</option>
-            <option value="0">UTC±0</option>
-            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
-            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
-            <option value="-2">UTC−2</option>
-            <option value="-5">UTC−5</option>
-            <option value="1">UTC+1</option>
-            <option value="2">UTC+2</option>
-          </select>
-        </div>
-        <div class="field field--full">
-          <label for="dom-house-system">Sistema de casas</label>
-          <select id="dom-house-system" name="house-system" required>
-            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
-            <option value="placidus">Placidus</option>
-          </select>
         </div>
 
         <fieldset class="field field--full location-mode">
@@ -242,6 +223,27 @@
         </div>
 
         <div class="field field--full">
+          <label for="dom-tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
+          <select id="dom-tz-offset" name="tz-offset">
+            <option value="" selected>Sin especificar (según país)</option>
+            <option value="0">UTC±0</option>
+            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
+            <option value="-2">UTC−2</option>
+            <option value="-5">UTC−5</option>
+            <option value="1">UTC+1</option>
+            <option value="2">UTC+2</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="dom-house-system">Sistema de casas</label>
+          <select id="dom-house-system" name="house-system" required>
+            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
+            <option value="placidus">Placidus</option>
+          </select>
+        </div>
+
+        <div class="field field--full">
           <button type="submit" class="btn-primary">Calcular planeta dominante</button>
         </div>
       </form>
@@ -268,26 +270,6 @@
         <div class="field">
           <label for="vit-birth-time">Hora (local)</label>
           <input type="time" id="vit-birth-time" name="birth-time" step="1" required />
-        </div>
-        <div class="field field--full">
-          <label for="vit-tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
-          <select id="vit-tz-offset" name="tz-offset">
-            <option value="" selected>Sin especificar (según país)</option>
-            <option value="0">UTC±0</option>
-            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
-            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
-            <option value="-2">UTC−2</option>
-            <option value="-5">UTC−5</option>
-            <option value="1">UTC+1</option>
-            <option value="2">UTC+2</option>
-          </select>
-        </div>
-        <div class="field field--full">
-          <label for="vit-house-system">Sistema de casas</label>
-          <select id="vit-house-system" name="house-system" required>
-            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
-            <option value="placidus">Placidus</option>
-          </select>
         </div>
 
         <fieldset class="field field--full location-mode">
@@ -341,6 +323,27 @@
               <input type="text" id="vit-lon" name="lon" inputmode="decimal" autocomplete="off" placeholder="-57.6268" />
             </div>
           </div>
+        </div>
+
+        <div class="field field--full">
+          <label for="vit-tz-offset">Huso horario <span class="field__optional">(opcional)</span></label>
+          <select id="vit-tz-offset" name="tz-offset">
+            <option value="" selected>Sin especificar (según país)</option>
+            <option value="0">UTC±0</option>
+            <option value="-3">UTC−3 (Paraguay verano / DST 2000)</option>
+            <option value="-4">UTC−4 (Paraguay invierno / estándar)</option>
+            <option value="-2">UTC−2</option>
+            <option value="-5">UTC−5</option>
+            <option value="1">UTC+1</option>
+            <option value="2">UTC+2</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label for="vit-house-system">Sistema de casas</label>
+          <select id="vit-house-system" name="house-system" required>
+            <option value="equal" selected>Iguales (12 × 30° desde el Ascendente)</option>
+            <option value="placidus">Placidus</option>
+          </select>
         </div>
 
         <div class="field field--full">
