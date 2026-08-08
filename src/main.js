@@ -952,13 +952,20 @@ function buildAspectLists(bodies, ascendant, cusps, mc) {
       ${buildAspectList(quincunxes, "Quincuncio", "quincunx", QUINCUNX_ORB)}
       ${buildAspectList(oppositions, "Oposición", "opposition")}
       ${buildAspectList(conjunctions, "Conjunción", "conjunction")}
-      <p class="cusps-note">
-        Aspectos al Ascendente y Medio cielo: conjunción/oposición ≤ ${ANGLE_ASPECT_ORB[CONJUNCTION_ANGLE]}°;
-        trígono/cuadratura ≤ ${ANGLE_ASPECT_ORB[TRINE_ANGLE]}°;
-        sextil ≤ ${ANGLE_ASPECT_ORB[SEXTILE_ANGLE]}°;
-        semisextil/quincuncio ≤ ${ANGLE_ASPECT_ORB[QUINCUNX_ANGLE]}°.
-        Aspectos a nodos, Lilith, Fortuna e Infortunio: orbe ≤ ${POINT_ASPECT_ORB}°.
-      </p>
+    </div>
+  `;
+}
+
+const SUN_FIRST_HOUSE_READING = `El Sol en la Primera Casa, especialmente con el Sol en conjunción con el Ascendente, indica una fuerte voluntad, una abundante vitalidad y una intensa autoconciencia. Con confianza, optimismo y felicidad, esta posición intensifica el signo del Sol y, en sí misma, confiere honor y éxito. Las personas con esta posición no se dejan influenciar con facilidad por las opiniones o deseos de los demás, manifiestan una fuerte determinación de elegir su propio curso en la vida. Tienen una visión clara de lo que quieren, son firmes, y pueden ser extremadamente individualistas. Con gran iniciativa y capacidad de liderazgo, disfrutan dominar. Sus nativos son por lo general espontáneos, extrovertidos, valientes y entusiastas, pero con muchos aspectos desafiantes pueden ser dictatoriales, egoístas y pomposos. Disfrutan mucho recibir atención y publicidad y son de alguna manera exhibicionistas. Independientes, activos, emprendedores y orgullosos de sus logros, esta posición indica potencial de liderazgo y éxito que se produce a través de sus propios esfuerzos. El Sol en la primera casa adquiere muchas características del signo Aries.`;
+
+function buildChartReadingSection(sun) {
+  const house = sun?.house ?? "";
+  return `
+    <div class="result-block chart-reading">
+      <button type="button" class="btn-primary btn-primary--block" id="chart-reading-btn" data-sun-house="${house}">
+        Lectura de Carta Astral
+      </button>
+      <div id="chart-reading-output" class="chart-reading__output" hidden></div>
     </div>
   `;
 }
@@ -1117,6 +1124,7 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
     </div>
     ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
     ${buildAspectLists(bodies, ascLon, houses.cusps, mcLon)}
+    ${buildChartReadingSection(sun)}
   `;
 }
 
@@ -1398,6 +1406,22 @@ wireBirthTool({
     lon: "lon",
   },
   buildResult: buildChartResult,
+});
+
+document.getElementById("chart-output")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("#chart-reading-btn");
+  if (!btn) return;
+  const out = document.getElementById("chart-reading-output");
+  if (!out) return;
+
+  const sunHouse = Number(btn.dataset.sunHouse);
+  if (sunHouse === 1) {
+    out.innerHTML = `<p class="chart-reading__text">${SUN_FIRST_HOUSE_READING}</p>`;
+  } else {
+    out.innerHTML = `<p class="chart-reading__empty">Esta lectura aplica cuando el Sol está en la primera casa. En esta carta el Sol está en la casa ${Number.isFinite(sunHouse) ? sunHouse : "—"}.</p>`;
+  }
+  out.hidden = false;
+  out.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 
 function wireLocationMode({
