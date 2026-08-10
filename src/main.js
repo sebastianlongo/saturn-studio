@@ -1,5 +1,11 @@
 ﻿import { SwissEphemeris } from "@swisseph/browser";
-import { Planet, LunarPoint, HouseSystem } from "@swisseph/core";
+import {
+  Asteroid,
+  CalculationFlag,
+  Planet,
+  LunarPoint,
+  HouseSystem,
+} from "@swisseph/core";
 import { analyzeVitality, buildVitalityResult } from "./hyleg.js";
 import { findRegion, getCountryRegions, getRegionLabel, resolveImplicitUtcOffset } from "./location-regions.js";
 
@@ -49,6 +55,7 @@ const CHART_BODIES = [
   { name: "Urano", body: Planet.Uranus, glyph: "♅" },
   { name: "Neptuno", body: Planet.Neptune, glyph: "♆" },
   { name: "Plutón", body: Planet.Pluto, glyph: "♇" },
+  { name: "Kiron", body: Asteroid.Chiron, glyph: "⚷", useSwiss: true },
   { name: "Nodo Norte", body: LunarPoint.MeanNode, glyph: "☊", displayName: "Nodo N (m)" },
   { name: "Lilith", body: LunarPoint.MeanApogee, glyph: "⚸", displayName: "Lilith (m)" },
 ];
@@ -94,6 +101,8 @@ function getSwe() {
     swePromise = (async () => {
       const swe = new SwissEphemeris();
       await swe.init();
+      // Kiron (y otros asteroides) requieren seas_*.se1; Moshier no los incluye.
+      await swe.loadStandardEphemeris();
       return swe;
     })();
   }
@@ -1141,8 +1150,11 @@ async function calculateChart(dateUtc, lat, lon, houseSystem) {
   };
 
   const bodies = [];
-  for (const { name, body, glyph, displayName } of CHART_BODIES) {
-    const position = swe.calculatePosition(jd, body);
+  const swissFlags = CalculationFlag.SwissEphemeris | CalculationFlag.Speed;
+  for (const { name, body, glyph, displayName, useSwiss } of CHART_BODIES) {
+    const position = useSwiss
+      ? swe.calculatePosition(jd, body, swissFlags)
+      : swe.calculatePosition(jd, body);
     bodies.push(
       makeBodyEntry(name, glyph, position.longitude, houses.cusps, {
         longitudeSpeed: position.longitudeSpeed ?? 0,
