@@ -61,7 +61,7 @@ const CHART_BODIES = [
 ];
 
 /** Fracciones del radio de la rueda (0–1). */
-const WHEEL_SIGN_RADIUS_FRAC = 0.92;
+const WHEEL_SIGN_RADIUS_FRAC = 0.915;
 const WHEEL_BODY_RADIUS_FRAC = 0.62;
 
 const TRINE_ANGLE = 120;
@@ -75,6 +75,8 @@ const ASPECT_ORB = 5;
 const QUINCUNX_ORB = 3;
 /** Orbe máximo para aspectos que involucran puntos matemáticos. */
 const POINT_ASPECT_ORB = 3;
+/** Orbe máximo para aspectos que involucran Kiron (Quirón). */
+const CHIRON_ASPECT_ORB = 3;
 /** Orbes recomendados para aspectos a ángulos (Asc / MC). */
 const ANGLE_ASPECT_ORB = {
   [CONJUNCTION_ANGLE]: 6,
@@ -306,6 +308,10 @@ function isMathematicalPoint(body) {
   return MATHEMATICAL_POINT_NAMES.has(body.name) || body.kind === "lot";
 }
 
+function isChiron(body) {
+  return body.name === "Kiron";
+}
+
 function isChartAngle(body) {
   return body.kind === "angle";
 }
@@ -323,8 +329,11 @@ function withAnglesForAspects(bodies, { ascendant, mc, cusps }) {
   ];
 }
 
-/** Orbe efectivo: ángulos (Asc/MC) tienen pautas propias; puntos matemáticos ≤ 3°. */
+/** Orbe efectivo: Kiron ≤ 3°; ángulos (Asc/MC) tienen pautas propias; puntos matemáticos ≤ 3°. */
 function aspectOrbForPair(a, b, angle, defaultOrb) {
+  if (isChiron(a) || isChiron(b)) {
+    return Math.min(defaultOrb, CHIRON_ASPECT_ORB);
+  }
   if (isChartAngle(a) || isChartAngle(b)) {
     return ANGLE_ASPECT_ORB[angle] ?? defaultOrb;
   }
@@ -862,8 +871,6 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = [], mc) {
 
   const horizon = `<line x1="${(cx - rHouseOuter).toFixed(2)}" y1="${cy}" x2="${(cx + rHouseOuter).toFixed(2)}" y2="${cy}" class="sun-wheel__horizon" />`;
   const meridian = `<line x1="${cx}" y1="${(cy - rHouseOuter).toFixed(2)}" x2="${cx}" y2="${(cy + rHouseOuter).toFixed(2)}" class="sun-wheel__meridian" />`;
-  const eastLabel = `<text x="${(cx - rOuter + 6).toFixed(2)}" y="${(cy + 3.5).toFixed(2)}" class="sun-wheel__cardinal">E</text>`;
-  const westLabel = `<text x="${(cx + rOuter - 6).toFixed(2)}" y="${(cy + 3.5).toFixed(2)}" class="sun-wheel__cardinal">O</text>`;
 
   return `
     <svg class="sun-wheel__houses" viewBox="0 0 200 200" aria-hidden="true">
@@ -874,8 +881,6 @@ function buildWheelSvg(cusps, ascendant, activeSignIndex, bodies = [], mc) {
       ${houseLines.join("")}
       <g class="sun-wheel__aspects">${aspectLines.join("")}</g>
       ${houseLabels.join("")}
-      ${eastLabel}
-      ${westLabel}
     </svg>
   `;
 }

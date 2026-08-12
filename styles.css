@@ -515,13 +515,6 @@ body {
   color: var(--mist);
 }
 
-.field__optional {
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: color-mix(in srgb, var(--mist) 75%, transparent);
-}
-
 .field input,
 .field select {
   width: 100%;
@@ -815,15 +808,6 @@ body {
   stroke-dasharray: 3 2;
 }
 
-.sun-wheel__cardinal {
-  fill: rgba(216, 196, 154, 0.8);
-  font-size: 3.2cqi;
-  font-family: var(--font-body);
-  text-anchor: middle;
-  dominant-baseline: middle;
-  font-weight: 600;
-}
-
 .sun-wheel__zodiac-inner {
   fill: none;
   stroke: rgba(201, 184, 150, 0.4);
@@ -876,58 +860,63 @@ body {
 
 .sun-wheel__sign {
   position: absolute;
-  width: 16cqi;
-  margin-left: -8cqi;
-  margin-top: -2.4cqi;
+  width: max-content;
+  margin: 0;
   text-align: center;
-  font-size: max(0.58rem, 2.35cqi);
-  letter-spacing: 0.04em;
+  font-size: max(0.5rem, 1.78cqi);
+  font-weight: 650;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.95;
+  opacity: 0.97;
   z-index: 2;
   pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 
 .sun-wheel__sign span {
   display: inline-block;
-  max-width: 100%;
-  padding: 0.12em 0.35em;
-  border: 1px solid rgba(201, 184, 150, 0.4);
-  border-radius: 2px;
-  background: rgba(26, 29, 34, 0.88);
-  line-height: 1.2;
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 1;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-shadow:
+    0 0 0.4em rgba(12, 14, 18, 0.95),
+    0 0 0.12em rgba(12, 14, 18, 0.9),
+    0 1px 2px rgba(12, 14, 18, 0.8);
 }
 
 .sun-wheel__sign--fire,
 .sun-wheel__sign--fire span {
-  color: #f07068;
-  border-color: rgba(232, 120, 110, 0.7);
+  color: #f2a09a;
 }
 
 .sun-wheel__sign--air,
 .sun-wheel__sign--air span {
-  color: #d8e0ea;
-  border-color: rgba(210, 218, 228, 0.65);
+  color: #e4eaf2;
 }
 
 .sun-wheel__sign--water,
 .sun-wheel__sign--water span {
-  color: #7eb8e8;
-  border-color: rgba(110, 170, 230, 0.7);
+  color: #9ec8ee;
 }
 
 .sun-wheel__sign--earth,
 .sun-wheel__sign--earth span {
-  color: #b8c890;
-  border-color: rgba(170, 190, 130, 0.55);
+  color: #c6d4a4;
+}
+
+.sun-wheel__sign--active {
+  font-weight: 750;
+  letter-spacing: 0.075em;
 }
 
 .sun-wheel__sign--active span {
-  background: rgba(26, 29, 34, 0.95);
-  box-shadow: 0 0 0 1px currentColor;
+  text-shadow:
+    0 0 0.45em rgba(12, 14, 18, 1),
+    0 0 0.18em rgba(12, 14, 18, 0.95),
+    0 0 0.5em color-mix(in srgb, currentColor 45%, transparent);
 }
 
 .sun-wheel__body {
