@@ -1,5 +1,6 @@
 /**
- * Coordenadas aproximadas de capitales de departamento (PY/UY) / provincia (AR).
+ * Coordenadas aproximadas de capitales de departamento (PY/UY),
+ * provincia (AR) o comunidad autónoma (ES).
  * Suficiente para carta natal a nivel regional cuando no hay ciudad exacta.
  */
 
@@ -81,6 +82,31 @@ export const LOCATION_COUNTRIES = {
       { id: "soriano", name: "Soriano", lat: -33.2524, lon: -58.0305 },
       { id: "tacuarembo", name: "Tacuarembó", lat: -31.7333, lon: -55.9833 },
       { id: "treinta-y-tres", name: "Treinta y Tres", lat: -33.2333, lon: -54.3833 },
+    ],
+  },
+  España: {
+    regionLabel: "Comunidad autónoma",
+    timeZone: "Europe/Madrid",
+    regions: [
+      { id: "andalucia", name: "Andalucía", lat: 37.3891, lon: -5.9845 },
+      { id: "aragon", name: "Aragón", lat: 41.6488, lon: -0.8891 },
+      { id: "asturias", name: "Asturias", lat: 43.3619, lon: -5.8494 },
+      { id: "islas-baleares", name: "Islas Baleares", lat: 39.5696, lon: 2.6502 },
+      { id: "canarias", name: "Canarias", lat: 28.1235, lon: -15.4366 },
+      { id: "cantabria", name: "Cantabria", lat: 43.4623, lon: -3.8099 },
+      { id: "castilla-la-mancha", name: "Castilla-La Mancha", lat: 39.8628, lon: -4.0273 },
+      { id: "castilla-y-leon", name: "Castilla y León", lat: 41.6523, lon: -4.7245 },
+      { id: "cataluna", name: "Cataluña", lat: 41.3874, lon: 2.1686 },
+      { id: "comunidad-valenciana", name: "Comunidad Valenciana", lat: 39.4699, lon: -0.3763 },
+      { id: "extremadura", name: "Extremadura", lat: 38.9161, lon: -6.3437 },
+      { id: "galicia", name: "Galicia", lat: 42.8782, lon: -8.5448 },
+      { id: "madrid", name: "Comunidad de Madrid", lat: 40.4168, lon: -3.7038 },
+      { id: "murcia", name: "Región de Murcia", lat: 37.9922, lon: -1.1307 },
+      { id: "navarra", name: "Navarra", lat: 42.8125, lon: -1.6458 },
+      { id: "pais-vasco", name: "País Vasco", lat: 42.8467, lon: -2.6716 },
+      { id: "la-rioja", name: "La Rioja", lat: 42.4627, lon: -2.4449 },
+      { id: "ceuta", name: "Ceuta", lat: 35.8894, lon: -5.3213 },
+      { id: "melilla", name: "Melilla", lat: 35.2923, lon: -2.9381 },
     ],
   },
 };

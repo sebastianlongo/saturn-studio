@@ -60,6 +60,30 @@ const CHART_BODIES = [
   { name: "Lilith", body: LunarPoint.MeanApogee, glyph: "⚸", displayName: "Lilith (m)" },
 ];
 
+/** Puntos que el usuario puede mostrar u ocultar en rueda, tabla y aspectos. */
+const DISPLAYABLE_BODIES = [
+  { id: "Sol", label: "Sol", glyph: "☉", group: "astro" },
+  { id: "Luna", label: "Luna", glyph: "☽", group: "astro" },
+  { id: "Mercurio", label: "Mercurio", glyph: "☿", group: "astro" },
+  { id: "Venus", label: "Venus", glyph: "♀", group: "astro" },
+  { id: "Marte", label: "Marte", glyph: "♂", group: "astro" },
+  { id: "Júpiter", label: "Júpiter", glyph: "♃", group: "astro" },
+  { id: "Saturno", label: "Saturno", glyph: "♄", group: "astro" },
+  { id: "Urano", label: "Urano", glyph: "♅", group: "astro" },
+  { id: "Neptuno", label: "Neptuno", glyph: "♆", group: "astro" },
+  { id: "Plutón", label: "Plutón", glyph: "♇", group: "astro" },
+  { id: "Kiron", label: "Kiron", glyph: "⚷", group: "astro" },
+  { id: "Nodo Norte", label: "Nodo Norte", glyph: "☊", group: "astro" },
+  { id: "Nodo Sur", label: "Nodo Sur", glyph: "☋", group: "astro" },
+  { id: "Lilith", label: "Lilith", glyph: "⚸", group: "astro" },
+  { id: "Fortuna", label: "Fortuna", glyph: "⊕", group: "lot" },
+  { id: "Infortunio", label: "Infortunio", glyph: "⊖", group: "lot" },
+];
+
+const CLASSIC_BODY_IDS = ["Sol", "Luna", "Mercurio", "Venus", "Marte", "Júpiter", "Saturno"];
+const LOT_BODY_IDS = DISPLAYABLE_BODIES.filter((b) => b.group === "lot").map((b) => b.id);
+const VISIBLE_BODIES_STORAGE_KEY = "saturn-visible-bodies";
+
 /** Fracciones del radio de la rueda (0–1). */
 const WHEEL_SIGN_RADIUS_FRAC = 0.915;
 const WHEEL_BODY_RADIUS_FRAC = 0.62;
@@ -97,6 +121,112 @@ const MATHEMATICAL_POINT_NAMES = new Set([
 ]);
 
 let swePromise = null;
+let lastNatalChart = null;
+let visibleBodyIds = loadVisibleBodyIds();
+
+function loadVisibleBodyIds() {
+  const fallback = new Set(DISPLAYABLE_BODIES.map((b) => b.id));
+  try {
+    const raw = localStorage.getItem(VISIBLE_BODIES_STORAGE_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return fallback;
+    const allowed = new Set(DISPLAYABLE_BODIES.map((b) => b.id));
+    const next = new Set(parsed.filter((id) => allowed.has(id)));
+    return next;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveVisibleBodyIds() {
+  try {
+    localStorage.setItem(VISIBLE_BODIES_STORAGE_KEY, JSON.stringify([...visibleBodyIds]));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function filterVisibleBodies(bodies) {
+  return bodies.filter((b) => visibleBodyIds.has(b.name));
+}
+
+function bodyVisibilityCheckbox(item, idPrefix) {
+  const inputId = `${idPrefix}-${item.id.replace(/\s+/g, "-").toLowerCase()}`;
+  const checked = visibleBodyIds.has(item.id) ? " checked" : "";
+  return `
+    <label class="body-visibility__option" for="${inputId}">
+      <input type="checkbox" id="${inputId}" name="${idPrefix}-body" value="${item.id}"${checked} />
+      <span class="body-visibility__glyph" aria-hidden="true">${item.glyph}\uFE0E</span>
+      <span>${item.label}</span>
+    </label>`;
+}
+
+function buildBodyVisibilityGroupsHtml(idPrefix) {
+  const astros = DISPLAYABLE_BODIES.filter((b) => b.group === "astro");
+  const lots = DISPLAYABLE_BODIES.filter((b) => b.group === "lot");
+  return `
+    <div class="body-visibility__group">
+      <h3 class="body-visibility__group-title">Astros</h3>
+      <div class="body-visibility__grid">
+        ${astros.map((item) => bodyVisibilityCheckbox(item, idPrefix)).join("")}
+      </div>
+    </div>
+    <div class="body-visibility__group">
+      <h3 class="body-visibility__group-title">Partes arábicas</h3>
+      <div class="body-visibility__grid">
+        ${lots.map((item) => bodyVisibilityCheckbox(item, idPrefix)).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function applyVisibilityAction(action) {
+  if (action === "all") {
+    visibleBodyIds = new Set(DISPLAYABLE_BODIES.map((b) => b.id));
+  } else if (action === "none") {
+    visibleBodyIds = new Set();
+  } else if (action === "classics") {
+    visibleBodyIds = new Set(CLASSIC_BODY_IDS);
+  } else if (action === "lots") {
+    visibleBodyIds = new Set(LOT_BODY_IDS);
+  } else {
+    return;
+  }
+  saveVisibleBodyIds();
+  syncBodyVisibilityCheckboxes();
+  rerenderNatalChart();
+}
+
+function syncBodyVisibilityCheckboxes() {
+  document.querySelectorAll(".body-visibility input[type='checkbox']").forEach((input) => {
+    input.checked = visibleBodyIds.has(input.value);
+  });
+}
+
+function rerenderNatalChart() {
+  if (!lastNatalChart) return;
+  const output = document.getElementById("chart-output");
+  if (!output || output.hidden) return;
+  const {
+    placeLabel,
+    dateUtc,
+    houses,
+    bodies,
+    localLabel,
+    tzOffset,
+    houseSystem,
+  } = lastNatalChart;
+  output.innerHTML = buildChartResult(
+    placeLabel,
+    dateUtc,
+    houses,
+    bodies,
+    localLabel,
+    tzOffset,
+    houseSystem
+  );
+}
 
 function getSwe() {
   if (!swePromise) {
@@ -970,7 +1100,35 @@ function buildAspectLists(bodies, ascendant, cusps, mc) {
   `;
 }
 
-const SUN_FIRST_HOUSE_READING = `El Sol en la Primera Casa, especialmente con el Sol en conjunción con el Ascendente, indica una fuerte voluntad, una abundante vitalidad y una intensa autoconciencia. Con confianza, optimismo y felicidad, esta posición intensifica el signo del Sol y, en sí misma, confiere honor y éxito. Las personas con esta posición no se dejan influenciar con facilidad por las opiniones o deseos de los demás, manifiestan una fuerte determinación de elegir su propio curso en la vida. Tienen una visión clara de lo que quieren, son firmes, y pueden ser extremadamente individualistas. Con gran iniciativa y capacidad de liderazgo, disfrutan dominar. Sus nativos son por lo general espontáneos, extrovertidos, valientes y entusiastas, pero con muchos aspectos desafiantes pueden ser dictatoriales, egoístas y pomposos. Disfrutan mucho recibir atención y publicidad y son de alguna manera exhibicionistas. Independientes, activos, emprendedores y orgullosos de sus logros, esta posición indica potencial de liderazgo y éxito que se produce a través de sus propios esfuerzos. El Sol en la primera casa adquiere muchas características del signo Aries.`;
+const SUN_HOUSE_READINGS = {
+  1: `El Sol en la Primera Casa, especialmente con el Sol en conjunción con el Ascendente, indica una fuerte voluntad, una abundante vitalidad y una intensa autoconciencia. Con confianza, optimismo y felicidad, esta posición intensifica el signo del Sol y, en sí misma, confiere honor y éxito. Las personas con esta posición no se dejan influenciar con facilidad por las opiniones o deseos de los demás, manifiestan una fuerte determinación de elegir su propio curso en la vida. Tienen una visión clara de lo que quieren, son firmes, y pueden ser extremadamente individualistas. Con gran iniciativa y capacidad de liderazgo, disfrutan dominar. Sus nativos son por lo general espontáneos, extrovertidos, valientes y entusiastas, pero con muchos aspectos desafiantes pueden ser dictatoriales, egoístas y pomposos. Disfrutan mucho recibir atención y publicidad y son de alguna manera exhibicionistas. Independientes, activos, emprendedores y orgullosos de sus logros, esta posición indica potencial de liderazgo y éxito que se produce a través de sus propios esfuerzos. El Sol en la primera casa adquiere muchas características del signo Aries.
+
+Por lo general, para estos individuos hay una infancia feliz, una constitución fuerte y buena salud. Tienen abundante energía y fuertes poderes de recuperación que les ayudan a superar dolencias físicas y aflicciones de toda naturaleza. Su energía los hace hambrientos de éxito, y trabajarán largo y duro para lograr la distinción personal y la estima a los ojos del mundo. Para ellos, es primordial sentir que son personas de importancia y distinción.`,
+  2: `Tienden a atraer el dinero, pero éste entra y sale de sus vidas con la misma velocidad, inclinados a la extravagancia, disfrutan gastar en lujos, aunque muchas de sus posesiones podrían aumentar su valor con el tiempo. Es posible que vengan de familias acomodadas o tengan padres exitosos. Prácticos, persistentes, y creativos en asuntos financieros, a menudo ganan a través de superiores y personas influyentes, y podría haber ganancias por altos cargos y asuntos de gobierno.`,
+  3: `El Sol en la Tercera Casa muestra un fuerte impulso para lograr la distinción a través de la brillantez intelectual y los logros mentales, lo cual produce una inclinación científica con ganas de alcanzar el conocimiento y de comprender a fondo el funcionamiento interno de los procesos de la vida. Debido a su curiosidad, estas personas ansían investigar cosas nuevas, especialmente en lo que respecta a los asuntos gobernados por el signo en el que está el Sol en su Carta Astral. Con una mente activa y creativa, suelen ser buenos oradores y escritores, la capacidad de expresar y comunicar sus ideas es importante para ellos. Podrían lograr el éxito escribiendo, enseñando o impartiendo conferencias, su habilidad para expresarse muchas veces les convierte en líderes en su propio campo. La posición indica una posible fama por escritos o investigaciones, y podrían recaer algunos honores sobre los parientes del nativo. Estudios de comunicaciones y medios.
+
+Tienen el deseo de viajar y explorar todas las posibilidades en el medio en el que se mueven. Con una infancia posiblemente feliz, sus parientes, especialmente sus hermanos, y vecinos suelen desempeñar un papel importante en sus vidas, les gusta involucrarse en asuntos de su comunidad. Observadores, optimistas, científicos y flexibles, tienen la capacidad de tomar las decisiones correctas en el momento adecuado. Aunque suelen poseer gran capacidad de estudio, una personalidad fluida y alegre, y ser imparciales y autosuficientes, también podrían ser desorganizados, dominantes y arrogantes, además de que podría existir cierta tendencia a los malentendidos con familiares. El Sol en la Tercera Casa adquiere muchas características del signo Géminis.`,
+  4: `El Sol en la 4 casa. Esta posición del Sol indica un gran interés en establecer un hogar y una familia seguros, los nacidos en esta posición están orgullosos de su herencia familiar y podrían tener cierta perspectiva aristocrática. Orgullosos de su hogar y familia, que para ellos son de importancia primordial, desde su juventud sienten una profunda necesidad de establecer raíces. Generalmente, desean hacer de su casa una obra de arte, con belleza y opulencia; hasta dónde llega esta tendencia, y la forma en qué se hace, dependerá, por supuesto, de los medios materiales con los que cuenten y la clase social en la que se desenvuelven. Esta posición suele ser excelente para todas las fases de bienes raíces.
+
+Intuitivos e introvertidos, tienen habitualmente un fuerte sentido de sí mismos, una estrecha vinculación con sus antepasados y cierto interés en el pasado. Encontrar y conocer sus raíces es esencial para su sentido de sí mismos. Con cierta tendencia a sentirse inseguros, es posible que alguno de sus padres, o ambos, sean una influencia dominante en sus vidas, e incluso, en algunos casos, puede que tengan que luchar por su independencia. Generalmente hay fuertes lazos parentales y una feliz vida hogareña, pero si la Carta Astral muestra muchos aspectos desafiantes puede haber cierto deseo de salir de la casa paterna temprano.`,
+  5: `Esta posición del Sol confiere un amor por la vida y una poderosa voluntad hacia la autoexpresión creativa. Los nativos generalmente buscan placer y romance, quieren ser notados y apreciados, son altamente competitivos, y tienen cierta inclinación hacia los deportes, la música, el teatro y otras actividades artísticas. Aman a los niños y están activamente interesados en su desarrollo y educación, pero rara vez tienen una familia numerosa. Si en su Carta Astral el Sol está en una de los signos de fuego; Aries, Leo o Sagitario, es posible que tengan pocos hijos propios, o ninguno en absoluto.
+
+El Sol en la quinta casa. Muchas veces encuentran felicidad a través del romance y actividades que les den la oportunidad de expresarse en maneras dramáticas y creativas. Con una excelente disposición general y generalmente irradiando felicidad, suelen atraer a muchos amigos, sin embargo, a veces pueden mostrarse infantiles y egocéntricos, y en algunos casos pueden carecer de madurez y sutileza, mostrando un comportamiento que puede ser descarado y excesivamente dramático. Enérgicos y creativos, disfrutan de los placeres, la buena vida y la compañía de otras personas. Generalmente exitosos con el sexo opuesto, podrían tener muchos amoríos. Los nativos con esta posición del Sol son amantes ardientes, y suelen entregarse por completo cuando están involucrados en una aventura amorosa, sin embargo, son capaces de ser leales y fieles a una persona, aunque si el Sol está en Tauro o Escorpión, podría haber posesividad y celos.`,
+  6: `El Sol en la Sexta Casa confiere una salud delicada, requiriendo una atención adecuada a los hábitos alimenticios, del mismo modo, la recuperación después de una enfermedad puede ser prolongada. Una actitud positiva puede ayudarles a superar la debilidad física o la mala salud, igualmente, una rutina regular puede ser necesaria para su bienestar emocional. Determinados y leales, generalmente tienen un gran respeto por la belleza, la dieta, la salud y la higiene.
+
+Con cierta tendencia al perfeccionismo, suelen ser eficientes solucionadores de problemas y poseer talento para la organización, los nativos de esta posición buscan prestigio por medio de su trabajo y servicio, y, por lo general, son excelentes trabajadores que se enorgullecen de su trabajo y de sus logros. Sin embargo, necesitan sentirse apreciados y exigen gestos de agradecimiento por su trabajo, y si estos gestos no llegan, tendrán una mala disposición hacia sus empleadores y compañeros de trabajo e incluso es probable que intenten cambiar de trabajo. Encontrar un trabajo satisfactorio es esencial para ellos porque se dedican a su trabajo y se definen a través de él. Si el nativo de esta posición es el empleador, puede que sea muy exigente y autoritario con respecto a sus empleados, por otra parte, si el nativo es el empleado, es posible que exija muchos derechos y privilegios y esperará ser notado y apreciado.`,
+  7: `Las personas nacidas con el Sol en la Séptima Casa expresan su potencial de poder a través de relaciones personales cercanas; el matrimonio y otras asociaciones son esenciales para su identidad, aunque es posible que los nativos de esta posición salten de un lado a otro entre el miedo a la soledad y el miedo al compromiso, si el Sol cuenta con buenos aspectos atraerán compañeros sentimentales fuertes y leales, con un afecto duradero, igualmente, atraerán amigos fuertes, capaces y leales. Sin embargo, los nativos a veces tienen problemas para entender que los deseos de su pareja son tan importantes como los suyos, y podrían surgir enfrentamientos debido a su necesidad de ser dominante en las relaciones. La posición en sí promete honor y éxito en el matrimonio y en otros tipos de asociaciones que, en ambos casos, deberían aportar beneficios materiales, monetarios y sociales. Es posible que el matrimonio llegue hacia el final de la juventud, y su cónyuge probablemente será una persona prominente o de buen carácter y honorable. El sexo podría ser muy importante para ellos en el matrimonio. Si el Sol no está afectado negativamente, podría haber un éxito creciente en la vida después del matrimonio.`,
+  8: `El Sol en la Octava Casa puede representar un interés en los misterios más profundos de la vida, como la muerte y la supervivencia de la conciencia después de la muerte. Esto quizás no sea siempre evidente en los primeros años, pero se vuelve más significativo más adelante en la vida. Existe un interés en la superación personal por medio de la propia voluntad. Los nativos necesitan experimentar directamente un nivel profundo de realidad espiritual que trascienda las circunstancias materiales externas, una vez que adquieren esta conciencia, los nativos toman nota de que, mientras se adhieran a los principios de justicia, nada puede dañar su ser fundamental. Es probable que las lecciones que van con el Sol en la Octava Casa sean severas, porque lo que deben aprender es de carácter fundamental.
+
+Son creativos y se enorgullecen de las responsabilidades. Capaces de atraer el apoyo de otras personas, esta puede ser una posición muy política. Filosóficos y con profundas perspectivas, se esfuerzan por mejorarse a sí mismos. Podrían beneficiarse de una herencia, obtener dinero a través de una boda o manejar el dinero de otras personas. Es muy posible que haya preocupación por temas de impuestos, seguros, bienes de personas muertas y los asuntos financieros de socios comerciales. Si el Sol en la Octava Casa cuenta con buenos aspectos, puede indicar que se recibirán legados o herencias.`,
+};
+
+function renderSunHouseReading(text) {
+  return text
+    .split(/\n\n+/)
+    .map((paragraph) => `<p class="chart-reading__text">${paragraph.trim()}</p>`)
+    .join("");
+}
 
 function buildChartReadingSection(sun) {
   const house = sun?.house ?? "";
@@ -1049,17 +1207,19 @@ function buildAnglesAndCuspsSection(houses) {
 }
 
 function buildCompactBodiesHouses(bodies, houses, houseSystem) {
-  const planetRows = bodies
-    .map((b) => {
-      const retro = b.retrograde ? '<span class="retro-mark" title="Retrógrado">R</span>' : "";
-      return `
+  const planetRows = bodies.length
+    ? bodies
+        .map((b) => {
+          const retro = b.retrograde ? '<span class="retro-mark" title="Retrógrado">R</span>' : "";
+          return `
       <tr>
         <td class="ephem-planet"><span class="body-glyph" aria-hidden="true">${b.glyph}\uFE0E</span> ${bodyLabel(b)}</td>
         <td class="ephem-pos">${formatZodiacPosition(b.longitude)}${retro}</td>
         <td class="ephem-house"><span class="num">${b.house}</span></td>
       </tr>`;
-    })
-    .join("");
+        })
+        .join("")
+    : `<tr><td colspan="3" class="ephem-empty">Ningún astro ni parte seleccionada.</td></tr>`;
 
   const houseRows = Array.from({ length: 12 }, (_, i) => {
     const house = i + 1;
@@ -1077,6 +1237,16 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
 
   return `
     <div class="result-block result-block--compact">
+      <fieldset class="body-visibility body-visibility--compact">
+        <legend class="body-visibility__legend">Mostrar en la carta</legend>
+        <div class="body-visibility__toolbar">
+          <button type="button" class="body-visibility__btn" data-visibility-action="all">Todos</button>
+          <button type="button" class="body-visibility__btn" data-visibility-action="classics">Clásicos</button>
+          <button type="button" class="body-visibility__btn" data-visibility-action="lots">Solo partes</button>
+          <button type="button" class="body-visibility__btn" data-visibility-action="none">Ninguno</button>
+        </div>
+        ${buildBodyVisibilityGroupsHtml("result")}
+      </fieldset>
       <div class="chart-compact">
         <div class="ephem-panel">
           <table class="ephem-table">
@@ -1107,6 +1277,7 @@ function buildCompactBodiesHouses(bodies, houses, houseSystem) {
 
 function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOffset, houseSystem) {
   const dateUtcStr = dateUtc.toISOString().replace(".000Z", "Z");
+  const visibleBodies = filterVisibleBodies(bodies);
   const sun = bodies.find((b) => b.name === "Sol");
   const fortune = bodies.find((b) => b.name === "Fortuna");
   const infortune = bodies.find((b) => b.name === "Infortunio");
@@ -1117,6 +1288,14 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
   const mcLon = normalizeLongitude(
     Number.isFinite(houses.mc) ? houses.mc : houses.cusps[10]
   );
+  const fortuneRow =
+    fortune && visibleBodyIds.has("Fortuna")
+      ? `<dt>P. Fortuna</dt><dd>${fortune.sign} <span class="num">${fortune.degreesInSign}</span> · casa ${fortune.house} <span class="meta-note">(${sectLabel}: ${fortune.formula})</span></dd>`
+      : "";
+  const infortuneRow =
+    infortune && visibleBodyIds.has("Infortunio")
+      ? `<dt>P. Infortunio</dt><dd>${infortune.sign} <span class="num">${infortune.degreesInSign}</span> · casa ${infortune.house} <span class="meta-note">(${sectLabel}: ${infortune.formula})</span></dd>`
+      : "";
 
   return `
     <div class="result-block">
@@ -1128,16 +1307,16 @@ function buildChartResult(placeLabel, dateUtc, houses, bodies, localLabel, tzOff
         <dt>Sistema de casas</dt><dd>${houseSystem.label}</dd>
         <dt>Ascendente</dt><dd>${formatZodiacPosition(ascLon)}</dd>
         <dt>Medio cielo</dt><dd>${formatZodiacPosition(mcLon)}</dd>
-        <dt>P. Fortuna</dt><dd>${fortune.sign} <span class="num">${fortune.degreesInSign}</span> · casa ${fortune.house} <span class="meta-note">(${sectLabel}: ${fortune.formula})</span></dd>
-        <dt>P. Infortunio</dt><dd>${infortune.sign} <span class="num">${infortune.degreesInSign}</span> · casa ${infortune.house} <span class="meta-note">(${sectLabel}: ${infortune.formula})</span></dd>
+        ${fortuneRow}
+        ${infortuneRow}
       </dl>
     </div>
     <div class="result-block">
       <h2 class="result-heading">Carta natal</h2>
-      ${buildSunWheel(signIndex, bodies, houses.cusps, ascLon, mcLon)}
+      ${buildSunWheel(signIndex, visibleBodies, houses.cusps, ascLon, mcLon)}
     </div>
-    ${buildCompactBodiesHouses(bodies, houses, houseSystem)}
-    ${buildAspectLists(bodies, ascLon, houses.cusps, mcLon)}
+    ${buildCompactBodiesHouses(visibleBodies, houses, houseSystem)}
+    ${buildAspectLists(visibleBodies, ascLon, houses.cusps, mcLon)}
     ${buildChartReadingSection(sun)}
   `;
 }
@@ -1422,7 +1601,49 @@ wireBirthTool({
     lat: "lat",
     lon: "lon",
   },
-  buildResult: buildChartResult,
+  buildResult: (placeLabel, dateUtc, houses, bodies, localLabel, tzOffset, houseSystem) => {
+    lastNatalChart = {
+      placeLabel,
+      dateUtc,
+      houses,
+      bodies,
+      localLabel,
+      tzOffset,
+      houseSystem,
+    };
+    return buildChartResult(
+      placeLabel,
+      dateUtc,
+      houses,
+      bodies,
+      localLabel,
+      tzOffset,
+      houseSystem
+    );
+  },
+});
+
+document.getElementById("chart-body-visibility-fields")?.insertAdjacentHTML(
+  "beforeend",
+  buildBodyVisibilityGroupsHtml("form")
+);
+
+document.addEventListener("change", (e) => {
+  const input = e.target;
+  if (!(input instanceof HTMLInputElement) || input.type !== "checkbox") return;
+  if (!input.closest(".body-visibility")) return;
+  if (input.checked) visibleBodyIds.add(input.value);
+  else visibleBodyIds.delete(input.value);
+  saveVisibleBodyIds();
+  syncBodyVisibilityCheckboxes();
+  rerenderNatalChart();
+});
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-visibility-action]");
+  if (!btn) return;
+  e.preventDefault();
+  applyVisibilityAction(btn.dataset.visibilityAction);
 });
 
 document.getElementById("chart-output")?.addEventListener("click", (e) => {
@@ -1432,10 +1653,11 @@ document.getElementById("chart-output")?.addEventListener("click", (e) => {
   if (!out) return;
 
   const sunHouse = Number(btn.dataset.sunHouse);
-  if (sunHouse === 1) {
-    out.innerHTML = `<p class="chart-reading__text">${SUN_FIRST_HOUSE_READING}</p>`;
+  const reading = SUN_HOUSE_READINGS[sunHouse];
+  if (reading) {
+    out.innerHTML = renderSunHouseReading(reading);
   } else {
-    out.innerHTML = `<p class="chart-reading__empty">Esta lectura aplica cuando el Sol está en la primera casa. En esta carta el Sol está en la casa ${Number.isFinite(sunHouse) ? sunHouse : "—"}.</p>`;
+    out.innerHTML = `<p class="chart-reading__empty">Esta lectura aplica cuando el Sol está en las casas 1 a 8. En esta carta el Sol está en la casa ${Number.isFinite(sunHouse) ? sunHouse : "—"}.</p>`;
   }
   out.hidden = false;
   out.scrollIntoView({ behavior: "smooth", block: "nearest" });
